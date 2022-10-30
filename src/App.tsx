@@ -1,5 +1,10 @@
 import React from "react";
+import { Werdel } from "./Werdel";
 
 export const App = () => {
-    return (<div></div>);
-}
+  return (
+    <React.StrictMode>
+      <Werdel />
+    </React.StrictMode>
+  );
+};
