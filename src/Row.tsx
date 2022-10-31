@@ -1,22 +1,29 @@
 import React from "react";
-import Block, { BLOCK_VALUES } from "./Block";
+import Block from "./Block";
+import { Sound } from "./Sound";
+import { rangeMap } from "./util";
 
-export interface RowProps extends React.PropsWithChildren {
+const BASE_STYLES = "flex flex-row gap-1";
+
+export interface RowProps {
   columns: number;
-  values: string;
+  values?: Sound[];
 }
 
-export const Row = ({ columns, values, children }: RowProps) => {
-  if (!children) {
-    let emptyBlocks = Array(columns)
-      .fill(null)
-      .map((_e, index) => (
-        <Block key={index} value={BLOCK_VALUES.get(values[index])} />
-      ));
-    return <div className="flex flex-row gap-1">{emptyBlocks}</div>;
-  } else {
-    return <div></div>;
-  }
+let padEmpty = (blocks: any[], total: number) =>
+  blocks.concat(
+    rangeMap(total - blocks.length, (index) => (
+      <Block key={blocks.length + index} value={null} />
+    ))
+  );
+
+export const Row = ({ columns, values = [] }: RowProps) => {
+  let blocks = values.map((value, index) => (
+    <Block key={index} value={value} />
+  ));
+  blocks = padEmpty(values, columns);
+  
+  return <div className={`${BASE_STYLES}`}>{blocks}</div>;
 };
 
 export default Row;

@@ -1,9 +1,10 @@
 import React from "react";
+import { Sound } from "./Sound";
 
-export interface BlockValue {
-  main: string;
-  secondary: string;
-}
+const BASE_STYLES = "rounded-md p-4 flex flex-col items-center";
+const MUTED_BG = "bg-gray-300";
+const SOME_MATCH_BG = "bg-yellow-400";
+const MATCH_BG = "bg-green-400";
 
 export enum BlockState {
   NoMatch,
@@ -11,21 +12,12 @@ export enum BlockState {
   Match,
 }
 
-export const BLOCK_VALUES: Map<string, BlockValue> = new Map([
-  ["a", { main: "A", secondary: "ah" }],
-]);
-
 export interface BlockProps {
-  value: BlockValue | null | undefined;
+  value: Sound | null | undefined;
   state?: BlockState;
 }
 
-const MUTED_BG = "bg-gray-300";
-const SOME_MATCH_BG = "bg-yellow-400";
-const MATCH_BG = "bg-green-400";
-
 export const Block = ({ value, state = BlockState.NoMatch }: BlockProps) => {
-  const BASE_STYLE = "rounded-md p-4 flex flex-col items-center";
   if (value) {
     let bg =
       state === BlockState.Match
@@ -34,13 +26,13 @@ export const Block = ({ value, state = BlockState.NoMatch }: BlockProps) => {
         ? SOME_MATCH_BG
         : MUTED_BG;
     return (
-      <div className={`${BASE_STYLE} ${bg}`}>
-        <b className="text-bold">{value.main}</b>
-        <small>{value.secondary}</small>
+      <div className={`${BASE_STYLES} ${bg}`}>
+        <b className="text-bold">{value.name}</b>
+        <small>{value.ipa}</small>
       </div>
     );
   } else {
-    return <div className={`${BASE_STYLE} ${MUTED_BG}`}></div>;
+    return <div className={`${BASE_STYLES} ${MUTED_BG}`}></div>;
   }
 };
 
