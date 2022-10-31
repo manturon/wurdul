@@ -1,0 +1,12 @@
+{
+  "sound": {
+    "aggress": {
+      "value": ["uh", "g", "r", "eh", "s"],
+      "ipa": ["əˈɡɹɛs"]
+    },
+    "quicken": {
+      "value": ["k", "w", "ih", "k", ["n", ["uh", "n"]]],
+      "ipa": ["ˈkwɪk(ə)n"]
+    }
+  }
+}
