@@ -1,0 +1,158 @@
+{
+  "sound": {
+    "ah": {
+      "type": ["vowel"],
+      "ipa": ["ɑ", "ɔ", "ɒ"],
+      "asin": ["c[al]m", "l[o]ng", "c[augh]t", "c[o]t", "[awe]", "th[ough]t"],
+      "alias": ["aw", "o"],
+      "rhotic": ["ar", "or"]
+    },
+    "ar": {
+      "type": ["vowel"],
+      "ipa": ["ɑr", "ɒr"],
+      "asin": ["[ar]m", "[ar]t", "h[ear]t", "m[or]al"],
+      "alias": ["orr"],
+      "unrhotic": ["ah"]
+    },
+    "a": {
+      "type": ["vowel"],
+      "ipa": ["æ"],
+      "asin": ["b[a]t", "t[a]x", "m[a]tch", "s[a]ng"],
+      "rhotic": ["err"]
+    },
+    "eye": {
+      "type": ["vowel"],
+      "ipa": ["aɪ"],
+      "asin": ["[i]tem", "b[i]t[e]", "d[ie]", "s[ig]n", "h[igh]", "b[y]"],
+      "alias": ["y"],
+      "rhotic": ["ire"]
+    },
+    "ire": {
+      "type": ["vowel"],
+      "ipa": ["aɪr", "aɪər"],
+      "asin": ["h[ire]", "sp[ir]al"],
+      "unrhotic": ["eye"]
+    },
+    "ow": {
+      "type": ["vowel"],
+      "ipa": ["aʊ"],
+      "asin": ["c[ow]", "ab[ou]t", "l[ou]d", "h[ow]", "m[ou]th"],
+      "rhotic": ["our"]
+    },
+    "our": {
+      "type": ["vowel"],
+      "ipa": ["aʊr", "aʊər"],
+      "asin": ["fl[our]", "fl[ower]"],
+      "unrhortic": ["ow"]
+    },
+    "e": {
+      "type": ["vowel"],
+      "ipa": ["ɛ"],
+      "asin": ["b[e]t", "h[ea]lth"],
+      "alias": "eh",
+      "rhotic": "err"
+    },
+    "ay": {
+      "type": ["vowel"],
+      "ipa": ["eɪ"],
+      "asin": ["b[ai]t", "sl[ay]", "th[ey]", "f[a]c[e]", "w[eigh]t", "br[ea]k"],
+      "rhotic": ["err"]
+    },
+    "err": {
+      "type": ["vowel"],
+      "ipa": ["ɛr", "ɛər", "ær"],
+      "asin": ["[air]", "squ[ear]", "b[ear]", "M[ar]y", "m[arr]y", "m[err]y"],
+      "alias": ["air", "arr"],
+      "unrhotic": ["e", "a", "ay"]
+    },
+    "i": {
+      "type": ["vowel"],
+      "ipa": ["ɪ"],
+      "asin": ["b[i]t", "cr[y]stal"],
+      "alias": ["ih"],
+      "rhotic": ["eer"]
+    },
+    "ee": {
+      "type": ["vowel"],
+      "ipa": ["iː", "i"],
+      "asin": ["b[ea]t", "g[ee]k", "b[ea]ch", "br[ie]f", "l[e]gal"],
+      "rhotic": ["eer"]
+    },
+    "eer": {
+      "type": ["vowel"],
+      "ipa": ["ɪər", "ɪər"],
+      "asin": ["b[eer]", "n[ear]", "n[ear]er", "m[irr]or"],
+      "alias": ["irr"],
+      "unrhotic": ["i", "ee"]
+    },
+    "oh": {
+      "type": ["vowel"],
+      "ipa": ["oʊ"],
+      "asin": ["b[oa]t", "al[o]n[e]", "J[oe]", "d[ough]", "l[ow]", "n[o]"],
+      "rhotic": ["or"]
+    },
+    "or": {
+      "type": ["vowel"],
+      "ipa": ["ɔr"],
+      "asin": ["h[or]s[e]", "h[oar]s[e]", "p[our]"],
+      "unrhotic": ["oh", "aw"]
+    },
+    "oy": {
+      "type": ["vowel"],
+      "ipa": ["ɔɪ"],
+      "asin": ["ch[oi]c[e]", "b[oy]", "s[oi]l"],
+      "rhotic": ["oir"]
+    },
+    "oir": {
+      "type": ["vowel"],
+      "ipa": ["ɔɪr", "ɔɪər"],
+      "asin": ["c[oi]r", "l[aw]yer"],
+      "unrhotic": ["oy"]
+    },
+    "oo": {
+      "type": ["vowel"],
+      "ipa": ["uː", "u"],
+      "asin": ["y[ou]", "b[oo]t", "g[oo]s[e]", "p[oo]l"],
+      "rhotic": ["oor"]
+    },
+    "uu": {
+      "type": ["vowel"],
+      "ipa": ["ʊ"],
+      "asin": ["b[oo]k", "f[oo]t", "p[u]ll"],
+      "rhotic": ["oor"]
+    },
+    "oor": {
+      "type": ["vowel"],
+      "ipa": ["ʊr", "ʊər"],
+      "asin": ["p[oo]r", "t[ou]rist", "c[ou]rier"],
+      "alias": ["uurr"],
+      "unrhotic": ["oo", "uu"]
+    },
+    "ew": {
+      "type": ["vowel"],
+      "ipa": ["juː"],
+      "asin": ["c[u]te", "b[eau]ty", "[Q]", "m[u]sic"],
+      "alias": "yoo"
+    },
+    "ure": {
+      "type": ["vowel"],
+      "ipa": ["jʊr", "jʊər"],
+      "asin": ["c[u]r[e]", "p[ew]"],
+      "unrhotic": ["ew"]
+    },
+    "uh": {
+      "type": ["vowel"],
+      "ipa": ["ə", "ʌ"],
+      "asin": ["str[u]t", "s[u]ng", "abb[o]t", "b[u]t"],
+      "alias": "schwa",
+      "rhotic": ["ur"]
+    },
+    "ur": {
+      "type": ["vowel"],
+      "ipa": ["ɜr", "ər"],
+      "asin": ["n[ur]s[e]", "h[urr]y", "f[er]n", "bett[er]", "b[ir]d"],
+      "alias": ["urr", "uhrr", "er", "schwar"],
+      "unrhotic": ["uh"]
+    }
+  }
+}
