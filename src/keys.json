@@ -8,7 +8,7 @@
       "rhotic": ["ar", "or"]
     },
     "ar": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ɑr", "ɒr"],
       "asin": ["[ar]m", "[ar]t", "h[ear]t", "m[or]al"],
       "alias": ["orr"],
@@ -28,7 +28,7 @@
       "rhotic": ["ire"]
     },
     "ire": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["aɪr", "aɪər"],
       "asin": ["h[ire]", "sp[ir]al"],
       "unrhotic": ["eye"]
@@ -40,7 +40,7 @@
       "rhotic": ["our"]
     },
     "our": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["aʊr", "aʊər"],
       "asin": ["fl[our]", "fl[ower]"],
       "unrhortic": ["ow"]
@@ -59,7 +59,7 @@
       "rhotic": ["err"]
     },
     "err": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ɛr", "ɛər", "ær"],
       "asin": ["[air]", "squ[ear]", "b[ear]", "M[ar]y", "m[arr]y", "m[err]y"],
       "alias": ["air", "arr"],
@@ -79,7 +79,7 @@
       "rhotic": ["eer"]
     },
     "eer": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ɪər", "ɪər"],
       "asin": ["b[eer]", "n[ear]", "n[ear]er", "m[irr]or"],
       "alias": ["irr"],
@@ -92,7 +92,7 @@
       "rhotic": ["or"]
     },
     "or": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ɔr"],
       "asin": ["h[or]s[e]", "h[oar]s[e]", "p[our]"],
       "unrhotic": ["oh", "aw"]
@@ -104,7 +104,7 @@
       "rhotic": ["oir"]
     },
     "oir": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ɔɪr", "ɔɪər"],
       "asin": ["c[oi]r", "l[aw]yer"],
       "unrhotic": ["oy"]
@@ -122,7 +122,7 @@
       "rhotic": ["oor"]
     },
     "oor": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ʊr", "ʊər"],
       "asin": ["p[oo]r", "t[ou]rist", "c[ou]rier"],
       "alias": ["uurr"],
@@ -131,11 +131,11 @@
     "ew": {
       "type": ["vowel"],
       "ipa": ["juː"],
-      "asin": ["c[u]te", "b[eau]ty", "[Q]", "m[u]sic"],
+      "asin": ["c[u]te", "b[eau]ty", "q[ueue]", "m[u]sic"],
       "alias": "yoo"
     },
     "ure": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["jʊr", "jʊər"],
       "asin": ["c[u]r[e]", "p[ew]"],
       "unrhotic": ["ew"]
@@ -148,11 +148,150 @@
       "rhotic": ["ur"]
     },
     "ur": {
-      "type": ["vowel"],
+      "type": ["vowel", "rhotic"],
       "ipa": ["ɜr", "ər"],
       "asin": ["n[ur]s[e]", "h[urr]y", "f[er]n", "bett[er]", "b[ir]d"],
       "alias": ["urr", "uhrr", "er", "schwar"],
       "unrhotic": ["uh"]
+    },
+    "b": {
+      "type": ["consonant", "voiced", "plosive"],
+      "ipa": ["b"],
+      "asin": ["[b]uy", "ca[b]", "[b]rought"],
+      "voiceless": ["p"]
+    },
+    "ch": {
+      "type": ["consonant", "voiceless", "affricate"],
+      "ipa": ["tʃ"],
+      "asin": ["[ch]urch", "na[t]ure"],
+      "alias": ["tch"],
+      "voiced": ["j"]
+    },
+    "d": {
+      "type": ["consonant", "voiced", "plosive"],
+      "ipa": ["d"],
+      "asin": ["[d]ye", "la[dd]er", "ca[d]"],
+      "voiceless": ["t"]
+    },
+    "dh": {
+      "type": ["consonant", "voiced", "fricative"],
+      "ipa": ["ð"],
+      "asin": ["[th]y", "[th]is", "fa[th]er"],
+      "voiceless": ["th"]
+    },
+    "f": {
+      "type": ["consonant", "voiceless", "fricative"],
+      "ipa": ["f"],
+      "asin": ["[f]ight", "lea[f]", "[ph]one"],
+      "voiced": ["v"]
+    },
+    "g": {
+      "type": ["consonant", "voiced", "plosive"],
+      "ipa": ["ɡ"],
+      "asin": ["[g]o", "[g]uess", "[g]uitar", "ba[g]"],
+      "alias": ["gh"],
+      "voiceless": ["k"]
+    },
+    "h": {
+      "type": ["consonant", "fricative"],
+      "ipa": ["h"],
+      "asin": ["[h]igh", "a[h]ead", "[h]uge"]
+    },
+    "j": {
+      "type": ["consonant", "voiced", "affricate"],
+      "ipa": ["dʒ"],
+      "asin": ["[j]ive", "[g]iant", "ba[dg]er"],
+      "voiceless": ["ch"]
+    },
+    "k": {
+      "type": ["consonant", "voiceless", "plosive"],
+      "ipa": ["k"],
+      "asin": ["[k]ite", "s[k]y", "lo[ck]"],
+      "voiced": ["g"]
+    },
+    "l": {
+      "type": ["consonant", "liquid", "approximant"],
+      "ipa": ["l"],
+      "asin": ["[l]ie, s[l]y", "do[ll]ar", "ga[ll]"]
+    },
+    "m": {
+      "type": ["consonant", "nasal"],
+      "ipa": ["m"],
+      "asin": ["[m]y", "ca[m]", "s[m]ile"]
+    },
+    "n": {
+      "type": ["consonant", "nasal"],
+      "ipa": ["n"],
+      "asin": ["[n]igh", "ca[n]", "s[n]ide"]
+    },
+    "ng": {
+      "type": ["consonant", "nasal"],
+      "ipa": ["ŋ"],
+      "asin": ["ri[ng]", "si[ng]er"]
+    },
+    "p": {
+      "type": ["consonant", "voiceless", "plosive"],
+      "ipa": ["p"],
+      "asin": ["[p]ie", "s[p]y", "ca[p]"],
+      "voiced": ["b"]
+    },
+    "r": {
+      "type": ["consonant", "liquid", "approximant"],
+      "ipa": ["r"],
+      "asin": ["[r]ye", "t[r]y", "[r]ough"]
+    },
+    "s": {
+      "type": ["consonant", "voiceless", "fricative"],
+      "ipa": ["s"],
+      "asin": ["[s]igh", "i[c]e", "ten[s]e"],
+      "alias": ["ss"],
+      "voiced": ["z"]
+    },
+    "sh": {
+      "type": ["consonant", "voiceless", "fricative"],
+      "ipa": ["ʃ"],
+      "asin": ["[sh]y", "emo[ti]on", "ca[sh]"],
+      "voiced": ["zh"]
+    },
+    "t": {
+      "type": ["consonant", "voiceless", "plosive"],
+      "ipa": ["t"],
+      "asin": ["[t]ie", "s[t]y", "la[tt]er"],
+      "voiced": ["d"]
+    },
+    "th": {
+      "type": ["consonant", "voiceless", "fricative"],
+      "ipa": ["θ"],
+      "asin": ["[th]igh", "pa[th]"],
+      "voiced": ["dh"]
+    },
+    "v": {
+      "type": ["consonant", "voiced", "fricative"],
+      "ipa": ["v"],
+      "asin": ["[v]ine", "lea[v]e", "o[f]"],
+      "voiceless": ["f"]
+    },
+    "w": {
+      "type": ["consonant", "glide", "approximant"],
+      "ipa": ["w"],
+      "asin": ["[w]ine", "s[w]ine", "[wh]ere"]
+    },
+    "y": {
+      "type": ["consonant", "glide", "approximant"],
+      "ipa": ["j"],
+      "asin": ["[y]ou", "hallelu[j]ah"]
+    },
+    "z": {
+      "type": ["consonant", "voiced", "fricative"],
+      "ipa": ["z"],
+      "asin": ["[z]oo", "ha[s]", "ro[s]e"],
+      "voiceless": ["s"]
+    },
+    "zh": {
+      "type": ["consonant", "voiced", "fricative"],
+      "ipa": ["ʒ"],
+      "asin": ["plea[s]ure", "bei[g]e"],
+      "voiceless": ["sh"]
     }
   }
 }
