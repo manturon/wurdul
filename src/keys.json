@@ -93,7 +93,7 @@
     "eer": {
       "name": "eer",
       "type": ["vowel", "rhotic"],
-      "ipa": ["ɪər", "ɪər"],
+      "ipa": ["ɪər", "ɪr"],
       "asin": ["b[eer]", "n[ear]", "n[ear]er", "m[irr]or"],
       "alias": ["irr"],
       "unrhotic": ["i", "ee"]
