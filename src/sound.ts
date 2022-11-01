@@ -26,6 +26,8 @@ export type Sound = {
   voiceless?: string[];
 };
 
-export const SOUNDS = new Map<string, Sound>(
-  Object.entries(KEYS.sound as Record<string, Sound>)
+export type SoundKey = keyof typeof KEYS;
+
+export const SOUNDS = new Map<SoundKey, Sound>(
+  Object.entries(KEYS) as unknown as Array<[SoundKey, Sound]>
 );

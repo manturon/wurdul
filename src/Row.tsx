@@ -1,6 +1,6 @@
 import React from "react";
 import Block from "./Block";
-import { Sound } from "./Sound";
+import { Sound } from "./sound";
 import { rangeMap } from "./util";
 
 const BASE_STYLES = "flex flex-row gap-1";

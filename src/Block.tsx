@@ -1,5 +1,5 @@
 import React from "react";
-import { Sound } from "./Sound";
+import { Sound } from "./sound";
 
 const BASE_STYLES = "rounded-md p-4 flex flex-col items-center";
 const MUTED_BG = "bg-gray-300";

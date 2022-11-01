@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Keyboard from "./Keyboard";
 import Row from "./Row";
-import { Sound, SOUNDS } from "./Sound";
+import { Sound, SOUNDS } from "./sound";
 import { rangeMap } from "./util";
 
 const ROW_CONTAINER_STYLES = "flex flex-col gap-1 p-2";
@@ -52,8 +52,10 @@ export const Werdel = ({
     <Row key={index} columns={columns} values={sounds} />
   ));
 
-  return <div>
-    <div className={`${ROW_CONTAINER_STYLES}`}>{blockRows}</div>
-    <Keyboard></Keyboard>
-  </div>;
+  return (
+    <div>
+      <div className={`${ROW_CONTAINER_STYLES}`}>{blockRows}</div>
+      <Keyboard></Keyboard>
+    </div>
+  );
 };

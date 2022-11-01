@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { Sound, SOUNDS } from "./Sound";
+import { Sound, SOUNDS } from "./sound";
 
 export const KEYBOARD_LAYOUT: (string | null | [string | null, number])[][] = [
   [
@@ -11,7 +11,7 @@ export const KEYBOARD_LAYOUT: (string | null | [string | null, number])[][] = [
     ["err", 3],
     "oir",
     ["oor", 2],
-    "ure",
+    // "ure",
     "ur",
   ],
   [
@@ -27,7 +27,7 @@ export const KEYBOARD_LAYOUT: (string | null | [string | null, number])[][] = [
     "oy",
     "oo",
     "uu",
-    "ew",
+    // "ew",
     "uh",
   ],
   ["b", "d", "g", "s", "sh", "ch", "f", "h", "th"],
