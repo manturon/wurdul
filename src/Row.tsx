@@ -1,29 +1,32 @@
 import React from "react";
 import Block from "./Block";
-import { Sound } from "./sound";
+import { Transcription } from "./dictionary";
 import { rangeMap } from "./util";
 
-const BASE_STYLES = "flex flex-row gap-1";
+let padEmpty = (blocks: any[], total: number) =>
+  blocks.length < total
+    ? blocks.concat(
+        rangeMap(total - blocks.length, (index) => (
+          <Block key={blocks.length + index} value={null} />
+        ))
+      )
+    : blocks.slice(0, total);
 
 export interface RowProps {
   columns: number;
-  values?: Sound[];
+  transcription: Transcription;
 }
 
-let padEmpty = (blocks: any[], total: number) =>
-  blocks.concat(
-    rangeMap(total - blocks.length, (index) => (
-      <Block key={blocks.length + index} value={null} />
-    ))
-  );
+export const Row = ({ columns, transcription = [] }: RowProps) => {
+  let isTooLong = transcription.length > columns;
+  let blocks = transcription
+    .slice(0, columns)
+    .map((value, index) => (
+      <Block key={index} value={value} invalid={isTooLong} />
+    ));
+  blocks = padEmpty(blocks, columns);
 
-export const Row = ({ columns, values = [] }: RowProps) => {
-  let blocks = values.map((value, index) => (
-    <Block key={index} value={value} />
-  ));
-  blocks = padEmpty(values, columns);
-  
-  return <div className={`${BASE_STYLES}`}>{blocks}</div>;
+  return <div className="flex flex-row gap-1">{blocks}</div>;
 };
 
 export default Row;
