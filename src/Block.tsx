@@ -1,60 +1,76 @@
 import React from "react";
-import { SoundKey, SOUNDS } from "./sound";
+import { Match } from "./game";
 
-const BASE_STYLES =
-  "rounded-md w-14 h-14 overflow-hidden border-2 relative select-none";
-const MUTED_BG = "border-gray-100";
-const SOME_MATCH_BG = "border-yellow-400";
-const MATCH_BG = "border-green-400";
-const INVALID_BORDER = "border-red-400";
+const BASE_STYLE = "w-14 h-14 overflow-hidden border-2 relative select-none";
+const INPUT_STYLE = "border-gray-400 text-gray-700";
+const EMPTY_STYLE = "border-gray-100";
+const NO_MATCH_STYLE = "border-0 bg-gray-500 text-white";
+const SOME_MATCH_STYLE = "border-0 bg-yellow-500 text-white";
+const MATCH_STYLE = "border-0 bg-emerald-500 text-white";
+const INVALID_STYLE = "border-red-400";
 
-export enum BlockState {
-  NoMatch,
-  SomeMatch,
-  Match,
-}
+// Map match type to a block style
+const styleMap = {
+  [Match.MATCH]: MATCH_STYLE,
+  [Match.SOME_MATCH]: SOME_MATCH_STYLE,
+  [Match.INVALID]: INVALID_STYLE,
+  [Match.NO_MATCH]: NO_MATCH_STYLE,
+};
 
 export interface BlockProps {
-  value: SoundKey | null | undefined;
-  state?: BlockState;
-  invalid?: boolean;
+  /**
+   * Is the block representing the player input?
+   */
+  input?: boolean;
+  /**
+   * Main text of the block. None for an empty block.
+   */
+  head?: string;
+  /**
+   * Little extra characters to display on the corner.
+   */
+  info?: string;
+  /**
+   * Outcome in case it is a guess.
+   */
+  guessMatch?: Match;
 }
 
+/**
+ * A block that contains a guess outcome, current player input or nothing.
+ */
 export const Block = ({
-  value,
-  state = BlockState.NoMatch,
-  invalid = false,
+  head,
+  info,
+  input = false,
+  guessMatch,
 }: BlockProps) => {
-  if (value) {
-    let bg =
-      state === BlockState.Match
-        ? MATCH_BG
-        : state === BlockState.SomeMatch
-        ? SOME_MATCH_BG
-        : MUTED_BG;
-    let sub = SOUNDS.get(value)?.ipa[0];
+  if (head) {
+    let style = input ? INPUT_STYLE : styleMap[guessMatch ?? Match.NO_MATCH];
     return (
-      <div className={`${BASE_STYLES} ${invalid ? INVALID_BORDER : bg}`}>
+      <div className={`${BASE_STYLE} ${style}`}>
         <div className="h-full h-full flex flex-row justify-center items-center">
-          <b
-            className="block font-bold capitalize text-xl mx-auto text-center text-blue-900"
-            style={{ fontVariant: "small-caps" }}
-          >
-            {value}
+          <b className="block font-bold text-2xl mx-auto text-center uppercase">
+            {head}
           </b>
         </div>
         <div className="h-4 w-full absolute text-left pl-1 bottom-0 left-0 leading-none">
-          {sub ? (
-            <small className="font-medium text-blue-800 opacity-50 text-xs font-sans">
-              {sub}
+          {info ? (
+            <small className="font-medium opacity-50 text-xs font-sans">
+              {info}
             </small>
           ) : null}
         </div>
       </div>
     );
   } else {
-    return <div className={`${BASE_STYLES} ${MUTED_BG}`}></div>;
+    // Empty element
+    return <EmptyBlock />;
   }
 };
+
+export const EmptyBlock = (props?: object) => (
+  <div {...props} className={`${BASE_STYLE} ${EMPTY_STYLE}`}></div>
+);
 
 export default Block;

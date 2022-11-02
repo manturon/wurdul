@@ -1,44 +1,38 @@
 import React, { ChangeEventHandler, useEffect, useRef, useState } from "react";
-import { getTranscriptions, Transcription } from "./dictionary";
+import Board from "./Board";
+import { englishDictionary as dictionary } from "./dictionary";
+import {
+  DEFAULT_COLUMNS,
+  DEFAULT_ROWS,
+  GuessHistory,
+  Input,
+  InputMode,
+  Match,
+} from "./game";
+import Header from "./Header";
 import { EnglishKeyboard, SoundKeyboard } from "./Keyboard";
-import Row from "./Row";
-import { Sound, SOUNDS } from "./sound";
-import { rangeMap } from "./util";
-
-export const DEFAULT_ROWS = 6;
-export const DEFAULT_COLUMNS = 5;
+import Sound, { WordSounds } from "./sound";
 
 export interface WerdelProps {
   rows?: number;
   columns?: number;
 }
 
-export enum InputMode {
-  Sound,
-  English,
-}
-const CODE_A = "a".codePointAt(0)!;
-const CODE_Z = "z".codePointAt(0)!;
-const isAlphaCi = (char: string) => {
-  let code = char[0].codePointAt(0)!;
-  return char.length === 1 && code >= CODE_A && code <= CODE_Z;
-};
-
 export const Werdel = ({
   rows = DEFAULT_ROWS,
   columns = DEFAULT_COLUMNS,
 }: WerdelProps) => {
-  let [inputMode, setInputMode] = useState(InputMode.English);
-  // let [word, setWord] = useState("");
-  let [transcription, setTranscription] = useState([] as Transcription);
+  let [inputMode, setInputMode] = useState(InputMode.ENGLISH);
+  let [soundChoices, setSoundChoices] = useState<WordSounds[]>([]);
+  let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
   let [english, setEnglish] = useState("");
-
-  let blockRows = rangeMap(rows, (index) => (
-    <Row key={index} columns={columns} transcription={transcription} />
-  ));
-
-  let keyboard =
-    inputMode === InputMode.English ? <EnglishKeyboard /> : <SoundKeyboard />;
+  let [history, setHistory] = useState<GuessHistory>([
+    [
+      [Sound.from("ah")!, Match.MATCH],
+      [Sound.from("ay")!, Match.SOME_MATCH],
+      [Sound.from("sh")!, Match.NO_MATCH],
+    ],
+  ]);
 
   let englishInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,32 +60,37 @@ export const Werdel = ({
 
   useEffect(() => {
     if (english) {
-      let transcription = getTranscriptions(english)[0];
-      console.log(transcription);
-      if (transcription) {
-        setTranscription(transcription);
+      let sounds = dictionary.wordSounds(english);
+      if (sounds.length) {
+        setSoundChoices(sounds);
+        setCurrentSoundChoice(0);
       } else {
-        setTranscription([]);
+        setSoundChoices([]);
       }
     }
   }, [english]);
 
   return (
-    <>
-      <div className="container">
-        <h1>wur-dul</h1>
-      </div>
-      <div className="container flex flex-col mx-auto">
-        <div className="flex flex-col gap-1 p-2 items-center">{blockRows}</div>
-        <input
-          className="border-b-2 w-sm mx-auto text-center"
-          ref={englishInputRef}
-          type="text"
-          value={english}
-          onChange={handleOnChange}
+    <div className="container h-screen flex flex-col justify-center align-center">
+      <Header />
+      <div className="mx-auto flex flex-col w-4/5">
+        <Board
+          rows={rows}
+          columns={columns}
+          history={history}
+          input={soundChoices[currentSoundChoice]}
         />
-        {keyboard}
+        <ul>
+          {soundChoices.map((choice, index) => (
+            <li key={index}>{choice.map((sound) => sound.name).join("-")}</li>
+          ))}
+        </ul>
+        {InputMode.ENGLISH ? (
+          <EnglishKeyboard value={english} onChange={handleOnChange} />
+        ) : (
+          <SoundKeyboard />
+        )}
       </div>
-    </>
+    </div>
   );
 };

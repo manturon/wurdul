@@ -1,10 +1,10 @@
-import React, { PropsWithChildren } from "react";
-import { Sound, SOUNDS } from "./sound";
+import React from "react";
+import { SoundKey } from "./sound";
 
-export type Key = string | null | [head: string | null, width: number];
-export type KeyboardLayout = Key[][];
+export type Key<T> = T | null | [head: T | null, width: number];
+export type KeyboardLayout<T = string> = Key<T>[][];
 
-export const SOUND_KEYBOARD_LAYOUT: KeyboardLayout = [
+export const SOUND_KEYBOARD_LAYOUT: KeyboardLayout<SoundKey> = [
   [
     ["eer", 2],
     "ar",
@@ -37,7 +37,6 @@ export const SOUND_KEYBOARD_LAYOUT: KeyboardLayout = [
   ["p", "t", "k", "z", "zh", "j", ["v", 2], "dh"],
   ["l", "r", "w", "y", "m", "n", "ng"],
 ];
-
 export const ENGLISH_KEYBOARD_LAYOUT: KeyboardLayout = [
   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
   ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
@@ -67,9 +66,24 @@ export const SoundKeyboard = () => {
   return <div className={`${KEYBOARD_BASE_STYLE}`}>{keys}</div>;
 };
 
-export const EnglishKeyboard = () => {
+export interface EnglishKeyboardProps {
+  value: string;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+}
+
+export const EnglishKeyboard = ({ onChange, value }: EnglishKeyboardProps) => {
   let keys = makeKeys(ENGLISH_KEYBOARD_LAYOUT);
-  return <div className={`${KEYBOARD_BASE_STYLE}`}>{keys}</div>;
+  return (
+    <div>
+      <input
+        className="border-b-2 w-sm mx-auto text-center"
+        type="text"
+        value={value}
+        onChange={onChange}
+      />
+      <div className={`${KEYBOARD_BASE_STYLE}`}>{keys}</div>
+    </div>
+  );
 };
 
 const KEY_BASE_STYLE =
