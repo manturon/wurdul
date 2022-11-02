@@ -77,16 +77,21 @@ export const Werdel = ({
   }, [english]);
 
   return (
-    <div className="w-96 flex flex-col mx-auto">
-      <div className="flex flex-col gap-1 p-2 items-center">{blockRows}</div>
-      <input
-        className="border-b-2 w-sm mx-auto text-center"
-        ref={englishInputRef}
-        type="text"
-        value={english}
-        onChange={handleOnChange}
-      />
-      {keyboard}
-    </div>
+    <>
+      <div className="container">
+        <h1>wur-dul</h1>
+      </div>
+      <div className="container flex flex-col mx-auto">
+        <div className="flex flex-col gap-1 p-2 items-center">{blockRows}</div>
+        <input
+          className="border-b-2 w-sm mx-auto text-center"
+          ref={englishInputRef}
+          type="text"
+          value={english}
+          onChange={handleOnChange}
+        />
+        {keyboard}
+      </div>
+    </>
   );
 };

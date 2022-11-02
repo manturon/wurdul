@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Werdel } from "./Werdel";
+import { Werdel } from "./Wurdul";
 
 export const App = () => {
   return (
