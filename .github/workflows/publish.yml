@@ -36,7 +36,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Build files
-        run: npx parcel build
+        run: npm run build -- --public-url ${{ steps.deployment.outputs.page_url }}
       
       - name: Archive artifact
         run: |
