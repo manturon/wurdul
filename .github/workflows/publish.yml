@@ -52,5 +52,5 @@ jobs:
         uses: actions/upload-pages-artifact@v1.0.4
         with:
           name: github-pages
-          path: $RUNNER_TEMP/artifact.tar
+          path: ${{ runner.temp }}/artifact.tar
         
