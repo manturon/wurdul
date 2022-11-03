@@ -173,11 +173,19 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
     let handleKeyDown: React.KeyboardEventHandler = (event) => {
       if (keyGoesUp(event.key)) {
         setCurrentSoundChoice((current) =>
-          choices.length ? Math.max(current - 1, 0) : current
+          choices.length
+            ? current - 1 < 0
+              ? choices.length - 1
+              : current - 1
+            : current
         );
       } else if (keyGoesDown(event.key)) {
         setCurrentSoundChoice((current) =>
-          choices.length ? Math.min(current + 1, choices.length - 1) : current
+          choices.length
+            ? current + 1 >= choices.length
+              ? 0
+              : current + 1
+            : current
         );
       }
     };
