@@ -58,7 +58,6 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
         let matchResult = matchGuess(answer, guess);
         let newHistory = [...history, matchResult];
         let gameOver = history.length === columns;
-        console.log("Game over", gameOver);
         return {
           ...state,
           input: [],
@@ -118,7 +117,6 @@ export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
     }),
     {}
   );
-  console.log("answer", answer, "guess", guess, "soundcount", soundCount);
   return guess.map((guessedSound, index) => {
     if (wordSoundAnswer.length < index) {
       return [guessedSound, Match.NO_MATCH];

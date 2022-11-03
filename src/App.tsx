@@ -6,7 +6,9 @@ export const App = () => {
   let columns = DEFAULT_COLUMNS;
   let rows = DEFAULT_ROWS;
   let answer = getAnswerByDate(columns, Date.now());
-  console.log("Answer", answer);
+  console.log(
+    `Answer: ${answer[0].map((sound) => sound.name).join("-")} (${answer[1]})`
+  );
 
   return (
     <React.StrictMode>

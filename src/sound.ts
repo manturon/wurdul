@@ -17,7 +17,7 @@ export type WordSounds = Sound[];
 export type SoundKey = keyof typeof KEYS;
 
 export class Sound {
-  protected static SOUNDS = new Map<SoundKey, Sound>(
+  public static SOUNDS = new Map<SoundKey, Sound>(
     Object.entries(KEYS).map(([soundKey, sound]) => [
       soundKey,
       Object.assign(new Sound(), sound),

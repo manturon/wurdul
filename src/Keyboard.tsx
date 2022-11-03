@@ -199,7 +199,6 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
 
     // Handle clicking on the choice list
     let handleOnClick = (soundChoice: number) => {
-      console.log(soundChoice);
       setCurrentSoundChoice(soundChoice);
     };
 
