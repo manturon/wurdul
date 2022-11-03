@@ -152,7 +152,7 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
     // Sets the input shown on the board
     gameActionDispatcher({
       type: GameEvent.Input,
-      payload: choices[currentSoundChoice],
+      input: choices[currentSoundChoice],
     });
   }, [currentSoundChoice, english]);
 

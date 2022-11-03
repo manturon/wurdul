@@ -1,10 +1,9 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useCallback, useEffect, useReducer } from "react";
 import Board from "./Board";
 import {
-  Answer,
-  DEFAULT_COLUMNS,
-  DEFAULT_ROWS,
   GameAction,
+  GameConfig,
+  GameEvent,
   GameState,
   gameStateReducer,
   initialGameState,
@@ -15,19 +14,19 @@ export const GameContext = createContext<
   [GameState, React.Dispatch<GameAction>]
 >(undefined!);
 
-export interface WerdelProps {
-  answer: Answer;
-  rows: number;
-  columns: number;
-}
+export type WurdulProps = GameConfig;
 
-export const Werdel = ({ answer, rows, columns }: WerdelProps) => {
+export const Wurdul = ({ answer, rows, columns }: WurdulProps) => {
   let [state, dispatcher] = useReducer(gameStateReducer, {
     ...initialGameState,
     answer,
     rows,
     columns,
-  } as GameState);
+  });
+
+  useEffect(() => {
+    dispatcher({ type: GameEvent.Reset, config: {answer, rows, columns} });
+  }, [answer, rows, columns]);
 
   return (
     <GameContext.Provider value={[state, dispatcher]}>

@@ -22,10 +22,13 @@ export enum GameEvent {
   Reset,
 }
 
-export interface GameAction {
-  type: GameEvent;
-  payload?: any;
-}
+export type GameAction =
+  | { type: GameEvent.Commit }
+  | { type: GameEvent.Reset; config: GameConfig }
+  | {
+      type: GameEvent.Input;
+      input: WordSounds;
+    };
 
 export interface GameState {
   answer: Answer;
@@ -43,9 +46,10 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
   let { columns, input, answer, history } = state;
   switch (action.type) {
     case GameEvent.Reset:
-      return initialGameState;
+      console.log("Reset!");
+      return { ...initialGameState, ...action.config };
     case GameEvent.Input:
-      return { ...state, input: action.payload || [] };
+      return { ...state, input: action.input || [] };
     case GameEvent.Commit: {
       if (state.gameOver) {
         return {
@@ -112,7 +116,8 @@ export const getAnswerByDate = (columns: number, timestamp: number): Answer => {
 export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
   let wordSoundAnswer = answer[0];
   let soundCount = wordSoundAnswer.reduce(
-    (previous, current) => ({...previous,
+    (previous, current) => ({
+      ...previous,
       [current.name]: (previous[current.name] ?? 0) + 1,
     }),
     {}
@@ -133,3 +138,18 @@ export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
     }
   });
 };
+
+export const getAnswerForWord = (word: string): Answer | null => {
+  let wordSound = englishDictionary.wordSounds(word);
+  if (wordSound.length) {
+    return [wordSound[0], word];
+  } else {
+    return null;
+  }
+};
+
+export interface GameConfig {
+  answer: Answer;
+  rows: number;
+  columns: number;
+}
