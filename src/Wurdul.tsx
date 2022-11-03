@@ -1,7 +1,4 @@
-import React, {
-  createContext,
-  useReducer,
-} from "react";
+import React, { createContext, useReducer } from "react";
 import Board from "./Board";
 import {
   DEFAULT_COLUMNS,
@@ -11,10 +8,12 @@ import {
   GameState,
   Match,
 } from "./game";
-import { EnglishKeyboard, InputMode, Keyboard, SoundKeyboard } from "./Keyboard";
-import Sound, { WordSounds } from "./sound";
+import { InputMode, Keyboard } from "./Keyboard";
+import Sound from "./sound";
 
-export const GameContext = createContext<[GameState, React.Dispatch<GameAction>]>(null!);
+export const GameContext = createContext<
+  [GameState, React.Dispatch<GameAction>]
+>(null!);
 
 const gameStateReducer: React.Reducer<GameState, GameAction> = (
   state,
@@ -23,6 +22,8 @@ const gameStateReducer: React.Reducer<GameState, GameAction> = (
   switch (action.type) {
     case GameEvent.Reset:
       return initialGameState;
+    case GameEvent.Input:
+      return { ...state, input: action.payload || [] };
     default:
       throw new Error("Unknown action dispatched: " + action);
   }

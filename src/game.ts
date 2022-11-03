@@ -16,6 +16,7 @@ export enum Match {
 }
 
 export enum GameEvent {
+  Input,
   Reset,
 }
 

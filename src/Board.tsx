@@ -1,24 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import Block, { BlockProps, EmptyBlock } from "./Block";
 import { rangeMap } from "./util";
 import { GuessHistory, GuessResult, Input } from "./game";
 import { WordSounds } from "./sound";
-
-export interface BoardProps {
-  rows: number;
-  /**
-   * Number of blocks per row.
-   */
-  columns: number;
-  /**
-   * The previous player guess results.
-   */
-  history: GuessHistory;
-  /**
-   * The current player input.
-   */
-  input: Input | undefined;
-}
+import { GameContext } from "./Wurdul";
 
 const makeRow = (cols: number, guess?: GuessResult | WordSounds) => {
   let blocks: JSX.Element[];
@@ -57,16 +42,21 @@ const makeRow = (cols: number, guess?: GuessResult | WordSounds) => {
 };
 
 /**
- * A board with rows that contain blocks with guesses, input or nothing.
+ * A board with rows of blocks that contain the guesses, the current input or nothing.
  */
-export const Board = ({ rows, columns, history, input = [] }: BoardProps) => {
+export const Board = () => {
+  let [gameState, dispatchGameAction] = useContext(GameContext);
+  let { history, input, rows, columns } = gameState;
+
   // Rows from previous guesses
   let playedRows = history.map((guess) => makeRow(columns, guess));
   // Current player input row
   let inputRow = makeRow(columns, input);
   // Empty rows
   let padding = rangeMap(rows - playedRows.length - 1, () => makeRow(columns));
+
   let blockRows = [...playedRows, inputRow, ...padding];
+
   return (
     <div className="w-72 mx-auto flex flex-col gap-1">
       {blockRows.map((blocks, key) => (

@@ -1,7 +1,7 @@
-import React, { Ref, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Block from "./Block";
 import { englishDictionary } from "./dictionary";
-import { Match } from "./game";
+import { GameEvent, Match } from "./game";
 import { SoundKey, WordSounds } from "./sound";
 import { keyGoesDown, keyGoesUp } from "./util";
 import { GameContext } from "./Wurdul";
@@ -83,10 +83,10 @@ const makeKeys = (
   });
 };
 
-export interface KeyboardProps {
-  initialInputMode: InputMode;
-}
-
+/**
+ * Return an array of the sounds for a word, sorted with the ones with
+ * a particular length first.
+ */
 const soundChoicesForEnglish = (english: string, lengthBias: number) => {
   let sounds = englishDictionary.wordSounds(english);
   if (sounds.length) {
@@ -108,77 +108,6 @@ const soundChoicesForEnglish = (english: string, lengthBias: number) => {
   }
 };
 
-export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
-  let [gameState, gameActionDispatcher] = useContext(GameContext);
-  let [inputMode, setInputMode] = useState(initialInputMode);
-  let [english, setEnglish] = useState("");
-  let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
-
-  if (inputMode === InputMode.ENGLISH) {
-    let choices = soundChoicesForEnglish(english, gameState.columns);
-    let choiceListRows = choices.map((choice, index) =>
-      makeChoiceBlocks(choice, gameState.columns, index === currentSoundChoice)
-    );
-
-    let handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
-      target,
-    }) => {
-      // Only allow alphabetic, dash and apostrophe characters
-      let value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
-      setEnglish(value);
-      setCurrentSoundChoice(0);
-    };
-
-    let handleKeyDown: React.KeyboardEventHandler = (event) => {
-      if (keyGoesUp(event.key)) {
-        setCurrentSoundChoice((current) =>
-          choices.length ? Math.max(current - 1, 0) : current
-        );
-      } else if (keyGoesDown(event.key)) {
-        setCurrentSoundChoice((current) =>
-          choices.length ? Math.min(current + 1, choices.length - 1) : current
-        );
-      }
-    };
-
-    return (
-      <div>
-        <input
-          type="text"
-          value={english}
-          onChange={handleOnChange}
-          onKeyDown={handleKeyDown}
-        />
-        <div className="h-full w-full mx-auto p-2 h-32">
-          <ul className="flex flex-col gap-2">
-            {choiceListRows.map((choice, index) => (
-              <li className="flex flex-row gap-0.5" key={index}>
-                {choice}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
-  return <div></div>
-};
-
-export const SoundKeyboard = () => {
-  let keys = makeKeys(SOUND_KEYBOARD_LAYOUT);
-  return <div></div> /*<div className={`${KEYBOARD_BASE_STYLE}`}>{keys}</div>*/;
-};
-
-export interface EnglishKeyboardProps {
-  value: string;
-  choices: WordSounds[];
-  onChange: React.ChangeEventHandler<HTMLInputElement>;
-  currentChoice: number;
-  maxColumns: number;
-  inputRef: Ref<HTMLInputElement>;
-}
-
 const makeChoiceBlocks = (
   wordSounds: WordSounds,
   maxBlocks: number,
@@ -194,15 +123,98 @@ const makeChoiceBlocks = (
     />
   ));
 
-export const EnglishKeyboard = ({
-  onChange,
-  choices,
-  currentChoice,
-  value,
-  maxColumns,
-  inputRef,
-}: EnglishKeyboardProps) => {
+export interface KeyboardProps {
+  initialInputMode: InputMode;
+}
 
+/**
+ * An input method for the player to input words or sounds.
+ */
+export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
+  let [gameState, gameActionDispatcher] = useContext(GameContext);
+
+  let [inputMode, setInputMode] = useState(initialInputMode);
+  // The current English word to get sounds from, if in english input mode
+  let [english, setEnglish] = useState("");
+  // The currently selected sound choice, in case there's more than one for a word
+  let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
+
+  let choices =
+    inputMode === InputMode.ENGLISH
+      ? soundChoicesForEnglish(english, gameState.columns)
+      : [];
+  let choiceListRows = choices.map((choice, index) =>
+    makeChoiceBlocks(choice, gameState.columns, index === currentSoundChoice)
+  );
+
+  // Is this the ideal way to do this?
+  useEffect(() => {
+    // Sets the input shown on the board
+    gameActionDispatcher({
+      type: GameEvent.Input,
+      payload: choices[currentSoundChoice],
+    });
+  }, [currentSoundChoice, english]);
+
+  if (inputMode === InputMode.ENGLISH) {
+    // English keyboard
+
+    // Handle the text field changing
+    let handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
+      target,
+    }) => {
+      // Only allow alphabetic, dash and apostrophe characters
+      let value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
+      setEnglish(value);
+      setCurrentSoundChoice(0);
+    };
+
+    // Handle a key press in the page
+    let handleKeyDown: React.KeyboardEventHandler = (event) => {
+      if (keyGoesUp(event.key)) {
+        setCurrentSoundChoice((current) =>
+          choices.length ? Math.max(current - 1, 0) : current
+        );
+      } else if (keyGoesDown(event.key)) {
+        setCurrentSoundChoice((current) =>
+          choices.length ? Math.min(current + 1, choices.length - 1) : current
+        );
+      }
+    };
+
+    // Handle clicking on the choice list
+    let handleOnClick = (soundChoice: number) => {
+      console.log(soundChoice);
+      setCurrentSoundChoice(soundChoice);
+    };
+
+    return (
+      <div className="w-full flex flex-col gap-1 items-center">
+        <input
+          type="text"
+          value={english}
+          className="w-2/5 p-1 pb-0 border-b-2 border-gray-200 focus:outline-none uppercase font-bold text-center"
+          onChange={handleOnChange}
+          onKeyDown={handleKeyDown}
+        />
+        <ul className="w-full flex flex-col gap-2">
+          {choiceListRows.map((soundBlocks, index) => (
+            <li
+              key={index}
+              className="flex flex-row gap-0.5"
+              onClick={() => handleOnClick(index)}
+            >
+              {soundBlocks}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  } else {
+    // Sound keyboard (TODO)
+  }
+
+  return <div></div>;
 };
 
 const KEY_BASE_STYLE =
