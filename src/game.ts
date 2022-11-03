@@ -113,11 +113,12 @@ export const getAnswerByDate = (columns: number, timestamp: number): Answer => {
 export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
   let wordSoundAnswer = answer[0];
   let soundCount = wordSoundAnswer.reduce(
-    (previous, current) => ({
+    (previous, current) => ({...previous,
       [current.name]: (previous[current.name] ?? 0) + 1,
     }),
     {}
   );
+  console.log("answer", answer, "guess", guess, "soundcount", soundCount);
   return guess.map((guessedSound, index) => {
     if (wordSoundAnswer.length < index) {
       return [guessedSound, Match.NO_MATCH];
