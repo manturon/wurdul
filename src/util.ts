@@ -1,7 +1,7 @@
 const CODE_A = "a".codePointAt(0)!;
 const CODE_Z = "z".codePointAt(0)!;
 
-export const isAlphaCi = (char: string) => {
+export const isAlphaCharCi = (char: string) => {
   let code = char[0].codePointAt(0)!;
   return char.length === 1 && code >= CODE_A && code <= CODE_Z;
 };

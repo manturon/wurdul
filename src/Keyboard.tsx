@@ -1,12 +1,26 @@
-import React, { Ref, useEffect } from "react";
+import React, { Ref, useContext, useEffect, useState } from "react";
 import Block from "./Block";
+import { englishDictionary } from "./dictionary";
 import { Match } from "./game";
 import { SoundKey, WordSounds } from "./sound";
+import { keyGoesDown, keyGoesUp } from "./util";
+import { GameContext } from "./Wurdul";
 
 export type Key<T> = T | null | [head: T | null, width: number];
 export type KeyboardLayout<T = string> = Key<T>[][];
 
-export const SOUND_KEYBOARD_LAYOUT: KeyboardLayout<SoundKey> = [
+export enum InputMode {
+  /**
+   * The player inputs sounds directly.
+   */
+  SOUNDS,
+  /**
+   * The player enters words from which the sounds input are derived.
+   */
+  ENGLISH,
+}
+
+const SOUND_KEYBOARD_LAYOUT: KeyboardLayout<SoundKey> = [
   [
     ["eer", 2],
     "ar",
@@ -39,7 +53,7 @@ export const SOUND_KEYBOARD_LAYOUT: KeyboardLayout<SoundKey> = [
   ["p", "t", "k", "z", "zh", "j", ["v", 2], "dh"],
   ["l", "r", "w", "y", "m", "n", "ng"],
 ];
-export const ENGLISH_KEYBOARD_LAYOUT: KeyboardLayout = [
+const ENGLISH_KEYBOARD_LAYOUT: KeyboardLayout = [
   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
   ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
   ["ENTER", "z", "x", "c", "v", "b", "n", "m", "DEL"],
@@ -67,6 +81,88 @@ const makeKeys = (
       </div>
     );
   });
+};
+
+export interface KeyboardProps {
+  initialInputMode: InputMode;
+}
+
+const soundChoicesForEnglish = (english: string, lengthBias: number) => {
+  let sounds = englishDictionary.wordSounds(english);
+  if (sounds.length) {
+    if (sounds.length > 1) {
+      // Put the most likely solution on top
+      let sorted = new Array<WordSounds>();
+      for (let sound of sounds) {
+        if (sound.length === lengthBias) {
+          sorted.unshift(sound);
+        } else {
+          sorted.push(sound);
+        }
+      }
+      sounds = sorted;
+    }
+    return sounds;
+  } else {
+    return [];
+  }
+};
+
+export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
+  let [gameState, gameActionDispatcher] = useContext(GameContext);
+  let [inputMode, setInputMode] = useState(initialInputMode);
+  let [english, setEnglish] = useState("");
+  let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
+
+  if (inputMode === InputMode.ENGLISH) {
+    let choices = soundChoicesForEnglish(english, gameState.columns);
+    let choiceListRows = choices.map((choice, index) =>
+      makeChoiceBlocks(choice, gameState.columns, index === currentSoundChoice)
+    );
+
+    let handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
+      target,
+    }) => {
+      // Only allow alphabetic, dash and apostrophe characters
+      let value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
+      setEnglish(value);
+      setCurrentSoundChoice(0);
+    };
+
+    let handleKeyDown: React.KeyboardEventHandler = (event) => {
+      if (keyGoesUp(event.key)) {
+        setCurrentSoundChoice((current) =>
+          choices.length ? Math.max(current - 1, 0) : current
+        );
+      } else if (keyGoesDown(event.key)) {
+        setCurrentSoundChoice((current) =>
+          choices.length ? Math.min(current + 1, choices.length - 1) : current
+        );
+      }
+    };
+
+    return (
+      <div>
+        <input
+          type="text"
+          value={english}
+          onChange={handleOnChange}
+          onKeyDown={handleKeyDown}
+        />
+        <div className="h-full w-full mx-auto p-2 h-32">
+          <ul className="flex flex-col gap-2">
+            {choiceListRows.map((choice, index) => (
+              <li className="flex flex-row gap-0.5" key={index}>
+                {choice}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  return <div></div>
 };
 
 export const SoundKeyboard = () => {
@@ -106,31 +202,7 @@ export const EnglishKeyboard = ({
   maxColumns,
   inputRef,
 }: EnglishKeyboardProps) => {
-  let keys = makeKeys(ENGLISH_KEYBOARD_LAYOUT);
-  let choiceListRows = choices.map((choice, index) =>
-    makeChoiceBlocks(choice, maxColumns, index === currentChoice)
-  );
-  return (
-    <div className="flex flex-col justify-center">
-      <input
-        className="border-b-2 w-sm mx-auto text-center focus:outline-none h-8 font-medium text-xl mt-8 uppercase mb-4"
-        type="text"
-        value={value}
-        onChange={onChange}
-        ref={inputRef}
-      />
-      <div className="h-full w-full mx-auto p-2 h-32">
-        <ul className="flex flex-col gap-2">
-          {choiceListRows.map((choice, index) => (
-            <li className="flex flex-row gap-0.5" key={index}>
-              {choice}
-            </li>
-          ))}
-        </ul>
-      </div>
-      {/*<div className={`${KEYBOARD_BASE_STYLE}`}>{keys}</div>*/}
-    </div>
-  );
+
 };
 
 const KEY_BASE_STYLE =

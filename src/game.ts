@@ -8,13 +8,26 @@ export type GuessMatch = [Sound, Match];
 export type GuessResult = GuessMatch[];
 export type GuessHistory = GuessResult[];
 
-export enum InputMode {
-  SOUNDS,
-  ENGLISH,
-}
 export enum Match {
   NO_MATCH,
   SOME_MATCH,
   MATCH,
   INVALID,
+}
+
+export enum GameEvent {
+  Reset,
+}
+
+export interface GameAction {
+  type: GameEvent;
+  payload?: any;
+}
+
+export interface GameState {
+  answer: WordSounds;
+  input: WordSounds;
+  history: GuessHistory;
+  rows: number;
+  columns: number;
 }
