@@ -25,7 +25,11 @@ export class Sound {
   );
 
   public static from(key: SoundKey) {
-    return this.SOUNDS.get(key) || null;
+    return Sound.SOUNDS.get(key) || null;
+  }
+
+  public is(other: Sound) {
+    return this === other || other.name === this.name;
   }
 
   public readonly name: SoundKey;

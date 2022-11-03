@@ -4,10 +4,12 @@ import Sound, { SoundKey, WordSounds } from "./sound";
 export type Transcription = SoundKey[];
 
 export class Dictionary {
-  private transcriptions: Map<string, Transcription[]>;
+  public readonly transcriptions: Map<string, Transcription[]>;
+  public readonly words: Set<string>;
 
   constructor(wordTranscriptions: Iterable<[string, Transcription[]]>) {
     this.transcriptions = new Map(wordTranscriptions);
+    this.words = new Set(this.transcriptions.keys());
   }
 
   public wordSounds(english: string): WordSounds[] {

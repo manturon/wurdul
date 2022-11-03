@@ -156,6 +156,10 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
     });
   }, [currentSoundChoice, english]);
 
+  if (gameState.gameOver) {
+    return <div></div>;
+  }
+
   if (inputMode === InputMode.ENGLISH) {
     // English keyboard
 
@@ -187,6 +191,9 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
               : current + 1
             : current
         );
+      } else if (event.key === "Enter") {
+        setEnglish("");
+        gameActionDispatcher({ type: GameEvent.Commit });
       }
     };
 

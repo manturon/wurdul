@@ -1,64 +1,33 @@
 import React, { createContext, useReducer } from "react";
 import Board from "./Board";
 import {
+  Answer,
   DEFAULT_COLUMNS,
   DEFAULT_ROWS,
   GameAction,
-  GameEvent,
   GameState,
-  Match,
+  gameStateReducer,
+  initialGameState,
 } from "./game";
 import { InputMode, Keyboard } from "./Keyboard";
-import Sound from "./sound";
 
 export const GameContext = createContext<
   [GameState, React.Dispatch<GameAction>]
->(null!);
-
-const gameStateReducer: React.Reducer<GameState, GameAction> = (
-  state,
-  action
-) => {
-  switch (action.type) {
-    case GameEvent.Reset:
-      return initialGameState;
-    case GameEvent.Input:
-      return { ...state, input: action.payload || [] };
-    default:
-      throw new Error("Unknown action dispatched: " + action);
-  }
-};
-
-const initialGameState: GameState = {
-  rows: DEFAULT_ROWS,
-  columns: DEFAULT_COLUMNS,
-  answer: [],
-  input: [],
-  history: [
-    [
-      [Sound.from("ah")!, Match.MATCH],
-      [Sound.from("ay")!, Match.SOME_MATCH],
-      [Sound.from("sh")!, Match.NO_MATCH],
-      [Sound.from("oir")!, Match.SOME_MATCH],
-      [Sound.from("ur")!, Match.MATCH],
-    ],
-  ],
-};
+>(undefined!);
 
 export interface WerdelProps {
-  rows?: number;
-  columns?: number;
+  answer: Answer;
+  rows: number;
+  columns: number;
 }
 
-export const Werdel = ({
-  rows = DEFAULT_ROWS,
-  columns = DEFAULT_COLUMNS,
-}: WerdelProps) => {
+export const Werdel = ({ answer, rows, columns }: WerdelProps) => {
   let [state, dispatcher] = useReducer(gameStateReducer, {
     ...initialGameState,
+    answer,
     rows,
     columns,
-  });
+  } as GameState);
 
   return (
     <GameContext.Provider value={[state, dispatcher]}>

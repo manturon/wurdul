@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import Block, { BlockProps, EmptyBlock } from "./Block";
+import Block, { EmptyBlock } from "./Block";
 import { rangeMap } from "./util";
-import { GuessHistory, GuessResult, Input } from "./game";
+import { GuessResult } from "./game";
 import { WordSounds } from "./sound";
 import { GameContext } from "./Wurdul";
 
@@ -46,16 +46,24 @@ const makeRow = (cols: number, guess?: GuessResult | WordSounds) => {
  */
 export const Board = () => {
   let [gameState, dispatchGameAction] = useContext(GameContext);
-  let { history, input, rows, columns } = gameState;
+  let { history, input, rows, columns, gameOver } = gameState;
 
   // Rows from previous guesses
   let playedRows = history.map((guess) => makeRow(columns, guess));
   // Current player input row
-  let inputRow = makeRow(columns, input);
-  // Empty rows
-  let padding = rangeMap(rows - playedRows.length - 1, () => makeRow(columns));
+  let blockRows = [...playedRows];
 
-  let blockRows = [...playedRows, inputRow, ...padding];
+  if (!gameOver && blockRows.length !== rows) {
+    let inputRow = makeRow(columns, input);
+    blockRows = [...blockRows, inputRow];
+  }
+
+  // Empty rows
+  let paddingRows = rows - blockRows.length;
+  if (paddingRows > 0) {
+    let padding = rangeMap(rows - playedRows.length - 1, () => makeRow(columns));
+    blockRows = [...blockRows, ...padding];
+  }
 
   return (
     <div className="w-72 mx-auto flex flex-col gap-1">
