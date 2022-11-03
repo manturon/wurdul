@@ -122,7 +122,7 @@ export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
     }),
     {}
   );
-  return guess.map((guessedSound, index) => {
+  return guess.map((guessedSound, index): GuessMatch => {
     if (wordSoundAnswer.length < index) {
       return [guessedSound, Match.NO_MATCH];
     }
@@ -130,6 +130,12 @@ export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
     if (guessedSound.is(expectedSound)) {
       soundCount[guessedSound.name] -= 1;
       return [guessedSound, Match.MATCH];
+    } else {
+      return [guessedSound, Match.NO_MATCH];
+    }
+  }).map(([guessedSound, match]): GuessMatch => {
+    if (match === Match.MATCH) {
+      return [guessedSound, match];
     } else if (soundCount[guessedSound.name]) {
       soundCount[guessedSound.name] -= 1;
       return [guessedSound, Match.SOME_MATCH];
