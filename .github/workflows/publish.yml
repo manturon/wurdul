@@ -38,8 +38,19 @@ jobs:
       - name: Build files
         run: npx parcel build
       
+      - name: Archive artifact
+        run: |
+          tar \
+            --dereference --hard-dereference \
+            --directory "dist" \
+            -cvf "$RUNNER_TEMP/artifact.tar" \
+            --exclude=.git \
+            --exclude=.github \
+            .
+      
       - name: Deploy page
         uses: actions/upload-pages-artifact@v1.0.4
         with:
-          path: dist
+          name: github-pages
+          path: $RUNNER_TEMP/artifact.tar
         
