@@ -1,0 +1,37 @@
+# To-do
+
+- Increase max. tries
+- Better error handling
+- Make a test suite
+- Improve performance
+  - Check for expensive functions being called multiple times
+  - Improve the handling of the huge dictionary
+- Adapt/optimize for mobile and other screen resolutions
+- Improve interface
+  - More feedback for actions
+    - Messages for winning, losing resetting, etc.
+    - Animations
+  - Add keyboards
+    - Sound keyboard that displays the sounds and their match state
+    - English keyboard for mobile use
+  - Add on-hover info
+    - Pronunciation examples for each sound
+  - Add header
+  - Add game explanation or instructions
+- Add game end screen
+  - Show the words you inputted in the game
+  - Show word definition?
+- Add game mode toggles
+- Improve the dictionary word pool
+  - Find a good way to filter the most common words
+  - Make an much smaller answer pool
+  - (Hard) Deprioritize or remove less relevant pronunciations
+    - Prefer pronunciations that feature American phonological features
+      - Yod-dropping
+      - Merger of the low-back vowels (mostly done)
+      - Remove length marks?
+      - Dark-L with centering diphthong?
+- Game mode options
+  - Daily, Infinite
+  - Configurable number of columns?
+- Wurmple
