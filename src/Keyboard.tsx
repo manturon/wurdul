@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import Block from "./Block";
-import { englishDictionary } from "./dictionary";
-import { GameEvent, Match } from "./game";
-import { SoundKey, WordSounds } from "./sound";
+import { DICTIONARY, GameEvent, Match } from "./game";
+import { SoundKey, WordSound } from "./sound";
 import { keyGoesDown, keyGoesUp } from "./util";
 import { GameContext } from "./Wurdul";
 
@@ -88,11 +87,11 @@ const makeKeys = (
  * a particular length first.
  */
 const soundChoicesForEnglish = (english: string, lengthBias: number) => {
-  let sounds = englishDictionary.wordSounds(english);
+  let sounds = DICTIONARY.wordSounds(english);
   if (sounds.length) {
     if (sounds.length > 1) {
       // Put the most likely solution on top
-      let sorted = new Array<WordSounds>();
+      let sorted = new Array<WordSound>();
       for (let sound of sounds) {
         if (sound.length === lengthBias) {
           sorted.unshift(sound);
@@ -109,7 +108,7 @@ const soundChoicesForEnglish = (english: string, lengthBias: number) => {
 };
 
 const makeChoiceBlocks = (
-  wordSounds: WordSounds,
+  wordSounds: WordSound,
   maxBlocks: number,
   isCurrent: boolean
 ) =>
@@ -174,9 +173,9 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
     };
 
     // Handle a key press in the page
-    let handleKeyDown: React.KeyboardEventHandler = (event) => {
+    let handleKeyDown: React.KeyboardEventHandler = event => {
       if (keyGoesUp(event.key)) {
-        setCurrentSoundChoice((current) =>
+        setCurrentSoundChoice(current =>
           choices.length
             ? current - 1 < 0
               ? choices.length - 1
@@ -184,7 +183,7 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
             : current
         );
       } else if (keyGoesDown(event.key)) {
-        setCurrentSoundChoice((current) =>
+        setCurrentSoundChoice(current =>
           choices.length
             ? current + 1 >= choices.length
               ? 0

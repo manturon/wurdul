@@ -1,21 +1,25 @@
 {
   "name": "wurdul",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "source": "src/index.html",
   "scripts": {
     "start": "parcel",
-    "build": "parcel build"
+    "build": "parcel build",
+    "parse-cmu": "ts-node bin/parse_cmu.ts --output src/dict.json"
   },
   "author": "manturon",
   "devDependencies": {
+    "@types/argparse": "^2.0.10",
+    "argparse": "^2.0.1",
     "parcel": "^2.7.0",
     "process": "^0.11.10",
-    "tailwindcss": "^3.2.1"
+    "ts-node": "^10.9.1"
   },
   "dependencies": {
     "@types/react": "^18.0.24",
     "@types/react-dom": "^18.0.8",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.2.1"
   }
 }
