@@ -13,7 +13,7 @@ export type SoundType =
   | "affricate"
   | "fricative"
   | "nasal";
-export type WordSounds = Sound[];
+export type WordSound = Sound[];
 export type SoundKey = keyof typeof KEYS;
 
 export class Sound {

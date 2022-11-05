@@ -1,4 +1,8 @@
-import React, { createContext, useCallback, useEffect, useReducer } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useReducer,
+} from "react";
 import Board from "./Board";
 import {
   GameAction,
@@ -25,7 +29,7 @@ export const Wurdul = ({ answer, rows, columns }: WurdulProps) => {
   });
 
   useEffect(() => {
-    dispatcher({ type: GameEvent.Reset, config: {answer, rows, columns} });
+    dispatcher({ type: GameEvent.Reset, config: { answer, rows, columns } });
   }, [answer, rows, columns]);
 
   return (

@@ -1,5 +1,7 @@
-import { Dictionary, englishDictionary } from "./dictionary";
-import Sound, { WordSounds } from "./sound";
+import { englishDictionary } from "./dictionary";
+import Sound, { WordSound } from "./sound";
+
+export const DICTIONARY = englishDictionary;
 
 export const DEFAULT_ROWS = 6;
 export const DEFAULT_COLUMNS = 5;
@@ -7,7 +9,7 @@ export const DEFAULT_COLUMNS = 5;
 export type GuessMatch = [Sound, Match];
 export type GuessResult = GuessMatch[];
 export type GuessHistory = GuessResult[];
-export type Answer = [sound: WordSounds, english: string];
+export type Answer = [sound: WordSound, english: string];
 
 export enum Match {
   NO_MATCH,
@@ -27,12 +29,12 @@ export type GameAction =
   | { type: GameEvent.Reset; config: GameConfig }
   | {
       type: GameEvent.Input;
-      input: WordSounds;
+      input: WordSound;
     };
 
 export interface GameState {
   answer: Answer;
-  input: WordSounds;
+  input: WordSound;
   history: GuessHistory;
   rows: number;
   columns: number;
@@ -87,33 +89,21 @@ export const initialGameState: GameState = {
 
 const answersMap = new Map();
 
-const preparePool = (columns: number, dictionary: Dictionary) => {
-  let pool: Answer[] = [];
-  for (let [head, sounds] of dictionary.transcriptions.entries()) {
-    sounds = sounds.filter((wordSound) => wordSound.length === columns);
-    if (sounds.length) {
-      for (let wordSound of sounds) {
-        pool.push([wordSound.map(Sound.from) as WordSounds, head]);
-      }
-    }
-  }
-  return pool;
-};
-
 export const getAnswerByDate = (columns: number, timestamp: number): Answer => {
-  let pool: Answer[];
+  let pool: Map<string, WordSound[]>;
   if (!answersMap.has(columns)) {
-    pool = preparePool(columns, englishDictionary);
+    pool = DICTIONARY.filterByLength(columns);
     answersMap.set(columns, pool);
   } else {
     pool = answersMap.get(columns);
   }
   timestamp |= 0; // Force it to be an integer
-  let answer = pool[timestamp % pool.length];
-  return answer;
+  let [word, wordSounds] = [...pool.entries()][timestamp % pool.size];
+  let wordSound = wordSounds[timestamp % wordSounds.length];
+  return [wordSound, word];
 };
 
-export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
+export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
   let wordSoundAnswer = answer[0];
   let soundCount = wordSoundAnswer.reduce(
     (previous, current) => ({
@@ -122,31 +112,33 @@ export const matchGuess = (answer: Answer, guess: WordSounds): GuessResult => {
     }),
     {}
   );
-  return guess.map((guessedSound, index): GuessMatch => {
-    if (wordSoundAnswer.length < index) {
-      return [guessedSound, Match.NO_MATCH];
-    }
-    let expectedSound = wordSoundAnswer[index];
-    if (guessedSound.is(expectedSound)) {
-      soundCount[guessedSound.name] -= 1;
-      return [guessedSound, Match.MATCH];
-    } else {
-      return [guessedSound, Match.NO_MATCH];
-    }
-  }).map(([guessedSound, match]): GuessMatch => {
-    if (match === Match.MATCH) {
-      return [guessedSound, match];
-    } else if (soundCount[guessedSound.name]) {
-      soundCount[guessedSound.name] -= 1;
-      return [guessedSound, Match.SOME_MATCH];
-    } else {
-      return [guessedSound, Match.NO_MATCH];
-    }
-  });
+  return guess
+    .map((guessedSound, index): GuessMatch => {
+      if (wordSoundAnswer.length < index) {
+        return [guessedSound, Match.NO_MATCH];
+      }
+      let expectedSound = wordSoundAnswer[index];
+      if (guessedSound.is(expectedSound)) {
+        soundCount[guessedSound.name] -= 1;
+        return [guessedSound, Match.MATCH];
+      } else {
+        return [guessedSound, Match.NO_MATCH];
+      }
+    })
+    .map(([guessedSound, match]): GuessMatch => {
+      if (match === Match.MATCH) {
+        return [guessedSound, match];
+      } else if (soundCount[guessedSound.name]) {
+        soundCount[guessedSound.name] -= 1;
+        return [guessedSound, Match.SOME_MATCH];
+      } else {
+        return [guessedSound, Match.NO_MATCH];
+      }
+    });
 };
 
 export const getAnswerForWord = (word: string): Answer | null => {
-  let wordSound = englishDictionary.wordSounds(word);
+  let wordSound = DICTIONARY.wordSounds(word);
   if (wordSound.length) {
     return [wordSound[0], word];
   } else {

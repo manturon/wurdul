@@ -2,10 +2,10 @@ import React, { useContext } from "react";
 import Block, { EmptyBlock } from "./Block";
 import { rangeMap } from "./util";
 import { GuessResult } from "./game";
-import { WordSounds } from "./sound";
+import { WordSound } from "./sound";
 import { GameContext } from "./Wurdul";
 
-const makeRow = (cols: number, guess?: GuessResult | WordSounds) => {
+const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
   let blocks: JSX.Element[];
   if (typeof guess === "object") {
     if (guess.length > cols) {
@@ -24,7 +24,7 @@ const makeRow = (cols: number, guess?: GuessResult | WordSounds) => {
       ));
     } else {
       // It's the current user input
-      blocks = (guess as WordSounds).map((sound, index) => (
+      blocks = (guess as WordSound).map((sound, index) => (
         <Block key={index} head={sound.name} input={true} info={sound.ipa} />
       ));
     }

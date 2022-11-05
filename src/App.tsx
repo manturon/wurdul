@@ -12,7 +12,7 @@ export const App = () => {
   let rows = DEFAULT_ROWS;
   let [answer, setAnswer] = useState(getAnswerByDate(columns, Date.now()));
   console.log(
-    `Answer: ${answer[0].map((sound) => sound.name).join("-")} (${answer[1]})`
+    `Answer: ${answer[0].map(sound => sound.name).join("-")} (${answer[1]})`
   );
 
   useEffect(() => {
