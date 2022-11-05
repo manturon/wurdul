@@ -17,15 +17,19 @@ export type WordSound = Sound[];
 export type SoundKey = keyof typeof KEYS;
 
 export class Sound {
-  public static SOUNDS = new Map<SoundKey, Sound>(
+  public static SOUND_MAP = new Map<SoundKey, Sound>(
     Object.entries(KEYS).map(([soundKey, sound]) => [
       soundKey,
       Object.assign(new Sound(), sound),
     ]) as any
   );
 
+  public static get all() {
+    return Sound.SOUND_MAP.values();
+  }
+
   public static from(key: SoundKey) {
-    return Sound.SOUNDS.get(key) || null;
+    return Sound.SOUND_MAP.get(key) || null;
   }
 
   public is(other: Sound) {

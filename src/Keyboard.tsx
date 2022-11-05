@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Block from "./Block";
-import { DICTIONARY, GameEvent, Match } from "./game";
+import { DICTIONARY, GameEvent, getSoundMatchStatus, Match, SoundMatchStatus } from "./game";
 import { SoundKey, WordSound } from "./sound";
 import { keyGoesDown, keyGoesUp } from "./util";
 import { GameContext } from "./Wurdul";
@@ -109,6 +109,7 @@ const soundChoicesForEnglish = (english: string, lengthBias: number) => {
 
 const makeChoiceBlocks = (
   wordSounds: WordSound,
+  matchMap: SoundMatchStatus,
   maxBlocks: number,
   isCurrent: boolean
 ) =>
@@ -118,7 +119,8 @@ const makeChoiceBlocks = (
       key={index}
       info={sound.ipa}
       head={sound.name}
-      guessMatch={isCurrent && index < maxBlocks ? Match.MATCH : undefined}
+      input={!isCurrent}
+      guessMatch={matchMap.get(sound)}
     />
   ));
 
@@ -142,8 +144,11 @@ export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
     inputMode === InputMode.ENGLISH
       ? soundChoicesForEnglish(english, gameState.columns)
       : [];
+  let matchMap = 
+    inputMode === InputMode.ENGLISH
+    ? getSoundMatchStatus(gameState.history) : new Map();
   let choiceListRows = choices.map((choice, index) =>
-    makeChoiceBlocks(choice, gameState.columns, index === currentSoundChoice)
+    makeChoiceBlocks(choice, matchMap, gameState.columns, index === currentSoundChoice)
   );
 
   // Is this the ideal way to do this?

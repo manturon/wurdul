@@ -5,6 +5,7 @@ const BASE_STYLE = "w-14 h-14 overflow-hidden border-2 relative select-none";
 const SMALL_STYLE = "w-7 h-7 overflow-hidden border relative select-none";
 const INPUT_STYLE = "border-gray-400 text-gray-700";
 const EMPTY_STYLE = "border-gray-100";
+const UNKNOWN_STYLE = "border bg-slate-100 text-black"
 const NO_MATCH_STYLE = "border-0 bg-gray-500 text-white";
 const SOME_MATCH_STYLE = "border-0 bg-yellow-500 text-white";
 const MATCH_STYLE = "border-0 bg-emerald-500 text-white";
@@ -14,6 +15,7 @@ const HEAD_SMALL_STYLE = "font-medium text-xs";
 
 // Map match type to a block style
 const styleMap = {
+  [Match.UNKNOWN]: UNKNOWN_STYLE,
   [Match.MATCH]: MATCH_STYLE,
   [Match.SOME_MATCH]: SOME_MATCH_STYLE,
   [Match.INVALID]: INVALID_STYLE,
@@ -38,6 +40,7 @@ export interface BlockProps {
    */
   guessMatch?: Match;
   small?: boolean;
+  active?: boolean;
 }
 
 /**

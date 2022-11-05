@@ -1,5 +1,5 @@
 import { englishDictionary } from "./dictionary";
-import Sound, { WordSound } from "./sound";
+import Sound, { SoundKey, WordSound } from "./sound";
 
 export const DICTIONARY = englishDictionary;
 
@@ -9,9 +9,11 @@ export const DEFAULT_COLUMNS = 5;
 export type GuessMatch = [Sound, Match];
 export type GuessResult = GuessMatch[];
 export type GuessHistory = GuessResult[];
+export type SoundMatchStatus = Map<Sound, Match>;
 export type Answer = [sound: WordSound, english: string];
 
 export enum Match {
+  UNKNOWN,
   NO_MATCH,
   SOME_MATCH,
   MATCH,
@@ -145,6 +147,25 @@ export const getAnswerForWord = (word: string): Answer | null => {
     return null;
   }
 };
+
+const ALL_UNKNOWN_MATCH = new Map(Array.from(Sound.all, (sound) => [sound, Match.UNKNOWN]));
+
+export const getSoundMatchStatus = (history: GuessHistory): SoundMatchStatus => {
+  if (!history.length) {
+    return ALL_UNKNOWN_MATCH;
+  }
+  let matchMap = new Map(ALL_UNKNOWN_MATCH);
+  for (let entry of history) {
+    for (let [sound, match] of entry) {
+      let currentMatch = matchMap.get(sound);
+      if (currentMatch === Match.MATCH || currentMatch === Match.NO_MATCH) {
+        continue;
+      }
+      matchMap.set(sound, match);
+    }
+  }
+  return matchMap;
+}
 
 export interface GameConfig {
   answer: Answer;
