@@ -13,24 +13,23 @@ export type SoundMatchStatus = Map<Sound, Match>;
 export type Answer = [sound: WordSound, english: string];
 
 export enum Match {
-  UNKNOWN,
-  NO_MATCH,
-  SOME_MATCH,
-  MATCH,
-  INVALID,
+  UNKNOWN = "unknown",
+  NO_MATCH = "no",
+  SOME_MATCH = "some",
+  MATCH = "match",
 }
 
 export enum GameEvent {
-  Commit,
-  Input,
-  Reset,
+  COMMIT = "commit",
+  INPUT = "input",
+  RESET = "reset",
 }
 
 export type GameAction =
-  | { type: GameEvent.Commit }
-  | { type: GameEvent.Reset; config: GameConfig }
+  | { type: GameEvent.COMMIT }
+  | { type: GameEvent.RESET; config: GameConfig }
   | {
-      type: GameEvent.Input;
+      type: GameEvent.INPUT;
       input: WordSound;
     };
 
@@ -49,12 +48,12 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
 ) => {
   let { columns, input, answer, history } = state;
   switch (action.type) {
-    case GameEvent.Reset:
+    case GameEvent.RESET:
       console.log("Reset!");
       return { ...initialGameState, ...action.config };
-    case GameEvent.Input:
+    case GameEvent.INPUT:
       return { ...state, input: action.input || [] };
-    case GameEvent.Commit: {
+    case GameEvent.COMMIT: {
       if (state.gameOver) {
         return {
           ...state,

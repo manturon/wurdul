@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import Block, { EmptyBlock } from "./Block";
+import Block, { BlockType } from "./Block";
 import { rangeMap } from "./util";
 import { GuessResult } from "./game";
 import { WordSound } from "./sound";
@@ -17,26 +17,27 @@ const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
       blocks = (guess as GuessResult).map(([sound, match], index) => (
         <Block
           key={index}
-          head={sound.name}
-          guessMatch={match}
-          info={sound.ipa}
+          type={BlockType.INFO}
+          value={sound.name}
+          tag={sound.ipa}
+          match={match}
         />
       ));
     } else {
       // It's the current user input
       blocks = (guess as WordSound).map((sound, index) => (
-        <Block key={index} head={sound.name} input={true} info={sound.ipa} />
+        <Block key={index} type={BlockType.INPUT} value={sound.name} />
       ));
     }
 
     if (cols) {
       let start = guess.length;
       let n = cols - start;
-      let fill = rangeMap(n, (index) => <EmptyBlock key={start + index} />);
+      let fill = rangeMap(n, index => <Block key={start + index} />);
       blocks.push(...fill);
     }
   } else {
-    blocks = rangeMap(cols ?? 0, (index) => <EmptyBlock key={index} />);
+    blocks = rangeMap(cols ?? 0, index => <Block key={index} />);
   }
   return blocks;
 };
@@ -49,7 +50,7 @@ export const Board = () => {
   let { history, input, rows, columns, gameOver } = gameState;
 
   // Rows from previous guesses
-  let playedRows = history.map((guess) => makeRow(columns, guess));
+  let playedRows = history.map(guess => makeRow(columns, guess));
   // Current player input row
   let blockRows = [...playedRows];
 
@@ -61,7 +62,9 @@ export const Board = () => {
   // Empty rows
   let paddingRows = rows - blockRows.length;
   if (paddingRows > 0) {
-    let padding = rangeMap(rows - playedRows.length - 1, () => makeRow(columns));
+    let padding = rangeMap(rows - playedRows.length - 1, () =>
+      makeRow(columns)
+    );
     blockRows = [...blockRows, ...padding];
   }
 
