@@ -22,8 +22,8 @@ const MATCH_TABLE_LAYOUT = [
  * Return an array of the sounds for a word, sorted with the ones with
  * a particular length first.
  */
-const soundChoicesForEnglish = (english: string, lengthBias: number) => {
-  let sounds = DICTIONARY.wordSounds(english);
+const soundChoicesForEnglish = async (english: string, lengthBias: number) => {
+  let sounds = await DICTIONARY.wordSounds(english);
   if (sounds.length) {
     if (sounds.length > 1) {
       // Put the most likely solution on top
@@ -67,6 +67,7 @@ const makeMatchStateTable = matchState => {
  */
 export const Keyboard = () => {
   let [gameState, gameActionDispatcher] = useContext(GameContext);
+  let matchMap = getSoundMatchStatus(gameState.history);
 
   let inputElement = useRef<HTMLInputElement>(null);
 
@@ -75,23 +76,42 @@ export const Keyboard = () => {
   // The currently selected sound choice, in case there's more than one for a word
   let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
 
-  let choices = soundChoicesForEnglish(english, gameState.columns);
-  let matchMap = getSoundMatchStatus(gameState.history);
-  let choiceListRows = choices.map((choice, index) =>
-    makeChoiceBlocks(
-      choice,
-      matchMap,
-      gameState.columns,
-      index === currentSoundChoice
-    )
-  );
+  let soundChoices = soundChoicesForEnglish(english, gameState.columns);
+  let [choices, setChoices] = useState<WordSound[]>([]);
+  let [choiceListRows, setChoiceListRows] = useState<JSX.Element[][]>();
+
+  useEffect(() => {
+    soundChoices.then(choices => [setChoices(choices)]);
+    soundChoices.then(choices =>
+      setChoiceListRows(
+        choices.map((choice, index) =>
+          makeChoiceBlocks(
+            choice,
+            matchMap,
+            gameState.columns,
+            index === currentSoundChoice
+          )
+        )
+      )
+    );
+  }, [english, currentSoundChoice]);
 
   // Is this the ideal way to do this?
+  // Trying deal with async and state...
   useEffect(() => {
-    // Sets the input shown on the board
-    gameActionDispatcher({
-      type: GameEvent.INPUT,
-      input: choices[currentSoundChoice],
+    soundChoices.then(choices => {
+      if (!english) {
+        gameActionDispatcher({
+          type: GameEvent.INPUT,
+          input: [],
+        });
+        return;
+      }
+      // Sets the input shown on the board
+      gameActionDispatcher({
+        type: GameEvent.INPUT,
+        input: choices[currentSoundChoice] || [],
+      });
     });
   }, [currentSoundChoice, english]);
 
@@ -121,6 +141,9 @@ export const Keyboard = () => {
 
   // Handle a key press in the page
   let handleKeyDown: React.KeyboardEventHandler = event => {
+    if (!choices || !choices.length) {
+      return;
+    }
     if (keyGoesUp(event.key)) {
       setCurrentSoundChoice(current =>
         choices.length
@@ -143,6 +166,9 @@ export const Keyboard = () => {
   };
 
   let commit = () => {
+    if (!choices) {
+      return;
+    }
     setEnglish("");
     gameActionDispatcher({ type: GameEvent.COMMIT });
   };
@@ -174,15 +200,17 @@ export const Keyboard = () => {
         </button>
       </div>
       <ul className="w-full flex flex-col gap-1 h-20 p-1 border-2 border-gray-100 bg-white">
-        {choiceListRows.map((soundBlocks, index) => (
-          <li
-            key={index}
-            className="flex flex-row gap-0.5"
-            onClick={() => handleOnClick(index)}
-          >
-            {soundBlocks}
-          </li>
-        ))}
+        {choiceListRows
+          ? choiceListRows.map((soundBlocks, index) => (
+              <li
+                key={index}
+                className="flex flex-row gap-0.5"
+                onClick={() => handleOnClick(index)}
+              >
+                {soundBlocks}
+              </li>
+            ))
+          : null}
       </ul>
     </div>
   );

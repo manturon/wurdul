@@ -34,7 +34,7 @@ export type GameAction =
     };
 
 export interface GameState {
-  answer: Answer;
+  answer: Answer | null;
   input: WordSound;
   history: GuessHistory;
   rows: number;
@@ -62,7 +62,7 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
       }
       let guess = input;
       if (guess.length === columns) {
-        let matchResult = matchGuess(answer, guess);
+        let matchResult = matchGuess(answer!, guess);
         let newHistory = [...history, matchResult];
         let gameOver = history.length === columns;
         return {
@@ -80,7 +80,7 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
 };
 
 export const initialGameState: GameState = {
-  answer: undefined!,
+  answer: null,
   rows: DEFAULT_ROWS,
   columns: DEFAULT_COLUMNS,
   input: [],
@@ -90,10 +90,13 @@ export const initialGameState: GameState = {
 
 const answersMap = new Map();
 
-export const getAnswerByDate = (columns: number, timestamp: number): Answer => {
+export const getAnswerByDate = async (
+  columns: number,
+  timestamp: number
+): Promise<Answer> => {
   let pool: Map<string, WordSound[]>;
   if (!answersMap.has(columns)) {
-    pool = DICTIONARY.filterByLength(columns);
+    pool = await DICTIONARY.filterByLength(columns);
     answersMap.set(columns, pool);
   } else {
     pool = answersMap.get(columns);
@@ -138,8 +141,10 @@ export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
     });
 };
 
-export const getAnswerForWord = (word: string): Answer | null => {
-  let wordSound = DICTIONARY.wordSounds(word);
+export const getAnswerForWord = async (
+  word: string
+): Promise<Answer | null> => {
+  let wordSound = await DICTIONARY.wordSounds(word);
   if (wordSound.length) {
     return [wordSound[0], word];
   } else {
@@ -147,9 +152,13 @@ export const getAnswerForWord = (word: string): Answer | null => {
   }
 };
 
-const ALL_UNKNOWN_MATCH = new Map(Array.from(Sound.all, (sound) => [sound, Match.UNKNOWN]));
+const ALL_UNKNOWN_MATCH = new Map(
+  Array.from(Sound.all, sound => [sound, Match.UNKNOWN])
+);
 
-export const getSoundMatchStatus = (history: GuessHistory): SoundMatchStatus => {
+export const getSoundMatchStatus = (
+  history: GuessHistory
+): SoundMatchStatus => {
   if (!history.length) {
     return ALL_UNKNOWN_MATCH;
   }
@@ -164,10 +173,10 @@ export const getSoundMatchStatus = (history: GuessHistory): SoundMatchStatus => 
     }
   }
   return matchMap;
-}
+};
 
 export interface GameConfig {
-  answer: Answer;
+  answer: Answer | null;
   rows: number;
   columns: number;
 }

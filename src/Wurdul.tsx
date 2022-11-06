@@ -8,7 +8,6 @@ import {
   gameStateReducer,
   initialGameState,
 } from "./game";
-import Header from "./Header";
 import { Keyboard } from "./Keyboard";
 
 export const GameContext = createContext<
@@ -31,11 +30,15 @@ export const Wurdul = ({ answer, rows, columns }: WurdulProps) => {
 
   return (
     <GameContext.Provider value={[state, dispatcher]}>
-      <div className="h-screen container mx-auto">
-        <div className="md:w-3/5 flex flex-col mx-auto py-2 justify-center gap-1 py-2">
-          <Board />
-          <Keyboard />
-        </div>
+      <div className="container mx-auto">
+        {answer ? (
+          <div className="md:w-3/5 flex flex-col mx-auto py-2 justify-center gap-1 py-2">
+            <Board />
+            <Keyboard />
+          </div>
+        ) : (
+          <div className="w-72 mx-auto text-right">Loading dictionary...</div>
+        )}
       </div>
     </GameContext.Provider>
   );
