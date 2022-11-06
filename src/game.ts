@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { englishDictionary } from "./dictionary";
 import Sound, { SoundKey, WordSound } from "./sound";
 
@@ -20,6 +21,7 @@ export enum Match {
 }
 
 export enum GameEvent {
+  INFO = "info",
   COMMIT = "commit",
   INPUT = "input",
   RESET = "reset",
@@ -28,6 +30,7 @@ export enum GameEvent {
 export type GameAction =
   | { type: GameEvent.COMMIT }
   | { type: GameEvent.RESET; config: GameConfig }
+  | { type: GameEvent.INFO; message: ReactNode }
   | {
       type: GameEvent.INPUT;
       input: WordSound;
@@ -40,6 +43,7 @@ export interface GameState {
   rows: number;
   columns: number;
   gameOver: boolean;
+  info?: ReactNode;
 }
 
 export const gameStateReducer: React.Reducer<GameState, GameAction> = (
@@ -48,6 +52,8 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
 ) => {
   let { columns, input, answer, history } = state;
   switch (action.type) {
+    case GameEvent.INFO:
+      return { ...state, info: action.message || undefined };
     case GameEvent.RESET:
       console.log("Reset!");
       return { ...initialGameState, ...action.config };

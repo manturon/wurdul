@@ -1,9 +1,26 @@
-import React, { useContext } from "react";
+import React, { Fragment, useContext } from "react";
 import Block, { BlockType } from "./Block";
 import { rangeMap } from "./util";
 import { GuessResult } from "./game";
 import { WordSound } from "./sound";
 import { GameContext } from "./Wurdul";
+
+const makeBlockInfo = asin => (
+  <Fragment>
+    Like in:{" "}
+    {asin.map((ex, index, { length }) => {
+      let { 1: left, 2: mark, 3: right } = /(\w*)\[(\w+)\](\w*)/.exec(ex)!;
+      return (
+        <Fragment>
+          {left}
+          <b>{mark}</b>
+          {right}
+          {length !== index + 1 ? ", " : null}
+        </Fragment>
+      );
+    })}
+  </Fragment>
+);
 
 const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
   let blocks: JSX.Element[];
@@ -21,6 +38,7 @@ const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
           value={sound.name}
           tag={sound.ipa}
           match={match}
+          title={() => makeBlockInfo(sound.asin)}
         />
       ));
     } else {
@@ -69,7 +87,15 @@ export const Board = () => {
   }
 
   return (
-    <div className="w-72 mx-auto flex flex-col gap-1">
+    <div className="w-72 mx-auto flex flex-col gap-1 relative">
+      {
+        // Not the best way to do this
+        gameState.info ? (
+          <div className="absolute -top-7 font-medium text-red-400 text-sm bg-white w-full">
+            {gameState.info}
+          </div>
+        ) : null
+      }
       {blockRows.map((blocks, key) => (
         <div key={key} className="flex flex-row gap-1">
           {blocks}

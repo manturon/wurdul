@@ -1,5 +1,6 @@
-import React from "react";
-import { Match } from "./game";
+import React, { ReactNode, useContext } from "react";
+import { GameEvent, Match } from "./game";
+import { GameContext } from "./Wurdul";
 
 export enum BlockSize {
   NORMAL = "normal",
@@ -20,7 +21,8 @@ const KEY_NORMAL_SIZE_STYLE = "h-5 w-12";
 const KEY_BIG_SIZE_STYLE = "h-8 w-32";
 const KEY_SMALL_SIZE_STYLE = "h-8 w-8";
 const KEY_HEAD_BASE_STYLE = "block mx-auto text-center uppercase";
-const KEY_INPUT_STYLE = "bg-white text-gray-700 font-medium border border-slate-100";
+const KEY_INPUT_STYLE =
+  "bg-white text-gray-700 font-medium border border-slate-100";
 
 const MATCH_STYLE = "border-transparent bg-emerald-500 text-white";
 const SOME_MATCH_STYLE = "border-transparent bg-yellow-500 text-white";
@@ -60,7 +62,7 @@ export enum BlockType {
   KEY = "key",
 }
 
-export type BlockProps = { size?: BlockSize; title?: string } & (
+export type BlockProps = { size?: BlockSize; title?: () => ReactNode } & (
   | { type: BlockType.INFO; value: string; tag?: string; match: Match }
   | { type: BlockType.INPUT; value: string }
   | { type: BlockType.KEY; value?: string; match?: Match }
@@ -71,15 +73,28 @@ export type BlockProps = { size?: BlockSize; title?: string } & (
  * A block that contains a guess outcome, current player input or nothing.
  */
 export const Block = (props: BlockProps) => {
+  let [gameState, dispatchGameAction] = useContext(GameContext);
   let { size } = props;
   size ??= BlockSize.NORMAL;
   if (props.type === BlockType.INFO) {
-    let { value, tag, match } = props;
+    let { value, tag, match, title } = props;
     let style = `aspect-square ${BASE_STYLE} ${MATCH_STYLE_MAP.get(
       match
     )} ${SIZE_STYLE_MAP.get(size)}`;
     return (
-      <div className={style}>
+      <div
+        className={style}
+        onMouseOver={
+          title
+            ? () => {
+                dispatchGameAction({ type: GameEvent.INFO, message: title!() });
+              }
+            : () => {}
+        }
+        onMouseLeave={() =>
+          dispatchGameAction({ type: GameEvent.INFO, message: undefined })
+        }
+      >
         <span className={HEAD_BASE_STYLE}>{value}</span>
         {tag ? (
           <small className="absolute bottom-0 left-1 font-sans font-medium text-xs opacity-50">
@@ -90,7 +105,9 @@ export const Block = (props: BlockProps) => {
     );
   } else if (props.type === BlockType.INPUT) {
     let { value } = props;
-    let style = `aspect-square ${BASE_STYLE} ${INPUT_STYLE} ${SIZE_STYLE_MAP.get(size)}`;
+    let style = `aspect-square ${BASE_STYLE} ${INPUT_STYLE} ${SIZE_STYLE_MAP.get(
+      size
+    )}`;
     return (
       <div className={style}>
         <span className={HEAD_BASE_STYLE}>{value}</span>
@@ -98,7 +115,9 @@ export const Block = (props: BlockProps) => {
     );
   } else if (props.type === BlockType.KEY) {
     let { value, match } = props;
-    let style = `${BASE_STYLE} ${KEY_BASE_STYLE} ${KEY_SIZE_STYLE_MAP.get(size)} ${match ? MATCH_STYLE_MAP.get(match) : KEY_INPUT_STYLE}`;
+    let style = `${BASE_STYLE} ${KEY_BASE_STYLE} ${KEY_SIZE_STYLE_MAP.get(
+      size
+    )} ${match ? MATCH_STYLE_MAP.get(match) : KEY_INPUT_STYLE}`;
     return (
       <div className={style}>
         <span className={KEY_HEAD_BASE_STYLE}>{value}</span>
@@ -106,7 +125,9 @@ export const Block = (props: BlockProps) => {
     );
   } else {
     // Empty block
-    let style = `aspect-square ${BASE_STYLE} ${EMPTY_STYLE} ${SIZE_STYLE_MAP.get(size)}`;
+    let style = `aspect-square ${BASE_STYLE} ${EMPTY_STYLE} ${SIZE_STYLE_MAP.get(
+      size
+    )}`;
     return <div className={style}></div>;
   }
 };
