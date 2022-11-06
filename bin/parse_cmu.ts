@@ -16,21 +16,21 @@ const CMU_DICTIONARY_URL =
   "http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict/cmudict-0.7b";
 
 const CMU_KEY_TO_WIKTIONARY_KEY_MAP = new Map([
-  ["aa", "ah"],
+  ["aa", "awe"],
   ["ao", "aw"], // Temporal
-  ["ae", "a"],
+  ["ae", "aa"],
   ["ay", "eye"],
-  ["aw", "ow"],
-  ["eh", "e"],
-  ["ey", "ay"],
+  ["aw", "ao"],
+  ["eh", "eh"],
+  ["ey", "ey"],
   ["ih", "i"],
   ["iy", "ee"],
   ["ow", "oh"],
   ["oy", "oy"],
   ["uw", "oo"],
-  ["uh", "uu"],
+  ["uh", "u"],
   ["ah", "uh"],
-  ["er", "ur"],
+  ["er", "er"],
   ["b", "b"],
   ["ch", "ch"],
   ["d", "d"],
@@ -58,20 +58,20 @@ const CMU_KEY_TO_WIKTIONARY_KEY_MAP = new Map([
 ]);
 
 const RHOTIC_VOWEL_MAP = new Map([
-  ["ah", "ar"],
-  ["oh", "or"],
-  ["aw", "or"],
-  ["eye", "ire"],
-  ["ow", "our"],
-  ["ay", "err"],
-  ["e", "err"],
-  ["a", "err"],
-  ["ee", "eer"],
-  ["i", "eer"],
-  ["oy", "oir"],
-  ["uu", "oor"],
-  ["oo", "oor"],
-  ["uh", "ur"],
+  ["awe", ["are"]],
+  ["oh", ["or"]],
+  ["aw", ["or"]],
+  ["eye", ["ire"]],
+  ["ao", ["our"]],
+  ["ey", ["err"]],
+  ["e", ["err"]],
+  ["aa", ["err"]],
+  ["ee", ["ear"]],
+  ["i", ["ear"]],
+  ["oy", ["oy", "er"]],
+  ["u", ["oor"]],
+  ["oo", ["oor"]],
+  ["uh", ["er"]],
 ]);
 
 const VOWELS = new Set([
@@ -147,10 +147,11 @@ const main = () => {
         // if it's last syllable or the next syllable doesn't immediately
         // start after the r
         let rhotic = RHOTIC_VOWEL_MAP.get(current);
-        keys.splice(i, 2, rhotic!);
+        keys.splice(i, 2, ...rhotic!);
+        i += rhotic!.length - 1;
       } else if (current === "aw") {
         // Cot-caught merger
-        keys[i] = "ah";
+        keys[i] = "awe";
       }
       i += 1;
     }

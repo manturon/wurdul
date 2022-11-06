@@ -36,15 +36,14 @@ export class Sound {
     return this === other || other.name === this.name;
   }
 
+  public get ipa() {
+    return this.ipas[0];
+  }
+
   public readonly name: SoundKey;
   public readonly type: SoundType[];
-  public readonly ipa: string[];
+  private readonly ipas: string[];
   public readonly asin: string[];
-  public readonly alias?: string[];
-  public readonly rhotic?: string[];
-  public readonly unrhotic?: string[];
-  public readonly voiced?: string[];
-  public readonly voiceless?: string[];
 }
 
 export default Sound;
