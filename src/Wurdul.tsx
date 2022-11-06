@@ -1,8 +1,4 @@
-import React, {
-  createContext,
-  useEffect,
-  useReducer,
-} from "react";
+import React, { createContext, useEffect, useReducer } from "react";
 import Board from "./Board";
 import {
   GameAction,
@@ -12,7 +8,7 @@ import {
   gameStateReducer,
   initialGameState,
 } from "./game";
-import { InputMode, Keyboard } from "./Keyboard";
+import { Keyboard } from "./Keyboard";
 
 export const GameContext = createContext<
   [GameState, React.Dispatch<GameAction>]
@@ -29,16 +25,20 @@ export const Wurdul = ({ answer, rows, columns }: WurdulProps) => {
   });
 
   useEffect(() => {
-    dispatcher({ type: GameEvent.Reset, config: { answer, rows, columns } });
+    dispatcher({ type: GameEvent.RESET, config: { answer, rows, columns } });
   }, [answer, rows, columns]);
 
   return (
     <GameContext.Provider value={[state, dispatcher]}>
-      <div className="h-screen container mx-auto">
-        <div className="w-3/5 h-full flex flex-col mx-auto py-2 justify-center">
-          <Board />
-          <Keyboard initialInputMode={InputMode.ENGLISH} />
-        </div>
+      <div className="container mx-auto">
+        {answer ? (
+          <div className="md:w-3/5 flex flex-col mx-auto py-2 justify-center gap-1 py-2">
+            <Board />
+            <Keyboard />
+          </div>
+        ) : (
+          <div className="w-72 mx-auto text-right">Loading dictionary...</div>
+        )}
       </div>
     </GameContext.Provider>
   );

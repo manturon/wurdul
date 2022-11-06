@@ -1,93 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
-import Block from "./Block";
-import { DICTIONARY, GameEvent, Match } from "./game";
-import { SoundKey, WordSound } from "./sound";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import Block, { BlockType } from "./Block";
+import {
+  DICTIONARY,
+  GameEvent,
+  getSoundMatchStatus,
+  SoundMatchStatus,
+} from "./game";
+import { WordSound } from "./sound";
 import { keyGoesDown, keyGoesUp } from "./util";
 import { GameContext } from "./Wurdul";
 
-export type Key<T> = T | null | [head: T | null, width: number];
-export type KeyboardLayout<T = string> = Key<T>[][];
-
-export enum InputMode {
-  /**
-   * The player inputs sounds directly.
-   */
-  SOUNDS,
-  /**
-   * The player enters words from which the sounds input are derived.
-   */
-  ENGLISH,
-}
-
-const SOUND_KEYBOARD_LAYOUT: KeyboardLayout<SoundKey> = [
-  [
-    ["eer", 2],
-    "ar",
-    "or",
-    "ire",
-    "our",
-    ["err", 3],
-    "oir",
-    ["oor", 2],
-    // "ure",
-    "ur",
-  ],
-  [
-    "i",
-    "ee",
-    ["ah", 2],
-    "oh",
-    "eye",
-    "ow",
-    "a",
-    "e",
-    "ay",
-    "oy",
-    "oo",
-    "uu",
-    // "ew",
-    "uh",
-  ],
-  ["b", "d", "g", "s", "sh", "ch", "f", "h", "th"],
-  ["p", "t", "k", "z", "zh", "j", ["v", 2], "dh"],
-  ["l", "r", "w", "y", "m", "n", "ng"],
+const MATCH_TABLE_LAYOUT = [
+  ["l", "r", "m", "n", "ng", "w", "y"],
+  ["p", "t", "k", "v", "z", "dh", "zh", "j"],
+  ["b", "d", "g", "f", "h", "s", "th", "sh", "ch"],
+  ["ey", "ee", "eye", "oh", "oo", "er", "ao", "ear", "or", "ire", "our"],
+  ["aa", "eh", "i", "awe", "u", "uh", "oy", "err", "are", "oor"],
 ];
-const ENGLISH_KEYBOARD_LAYOUT: KeyboardLayout = [
-  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-  ["ENTER", "z", "x", "c", "v", "b", "n", "m", "DEL"],
-];
-
-const KEYBOARD_BASE_STYLE = "flex flex-col gap-2 p-2";
-const KEYBOARD_ROW_BASE_STYLE = "flex flex-row gap-2";
-
-const makeKeys = (
-  layout: KeyboardLayout,
-  keyInfo?: (head: String) => string
-) => {
-  return layout.map((row, index) => {
-    return (
-      <div key={index} className={`${KEYBOARD_ROW_BASE_STYLE}`}>
-        {row.map((key, jndex) => {
-          let [head, width] = Array.isArray(key) ? key : [key, undefined];
-          if (head) {
-            let sub = keyInfo ? keyInfo(head) : undefined;
-            return <Key key={jndex} head={head} sub={sub} width={width} />;
-          } else {
-            return <Key key={jndex} width={width} />;
-          }
-        })}
-      </div>
-    );
-  });
-};
 
 /**
  * Return an array of the sounds for a word, sorted with the ones with
  * a particular length first.
  */
-const soundChoicesForEnglish = (english: string, lengthBias: number) => {
-  let sounds = DICTIONARY.wordSounds(english);
+const soundChoicesForEnglish = async (english: string, lengthBias: number) => {
+  let sounds = await DICTIONARY.wordSounds(english);
   if (sounds.length) {
     if (sounds.length > 1) {
       // Put the most likely solution on top
@@ -109,159 +45,173 @@ const soundChoicesForEnglish = (english: string, lengthBias: number) => {
 
 const makeChoiceBlocks = (
   wordSounds: WordSound,
+  matchMap: SoundMatchStatus,
   maxBlocks: number,
   isCurrent: boolean
 ) =>
   wordSounds.map((sound, index) => (
     <Block
-      small={true}
       key={index}
-      info={sound.ipa}
-      head={sound.name}
-      guessMatch={isCurrent && index < maxBlocks ? Match.MATCH : undefined}
+      type={BlockType.KEY}
+      value={sound.name}
+      match={isCurrent ? matchMap.get(sound) : undefined}
     />
   ));
 
-export interface KeyboardProps {
-  initialInputMode: InputMode;
-}
+const makeMatchStateTable = matchState => {
+  // TODO
+};
 
 /**
- * An input method for the player to input words or sounds.
+ * Handle user input, present choices and show current match state for sounds.
  */
-export const Keyboard = ({ initialInputMode }: KeyboardProps) => {
+export const Keyboard = () => {
   let [gameState, gameActionDispatcher] = useContext(GameContext);
+  let matchMap = getSoundMatchStatus(gameState.history);
 
-  let [inputMode, setInputMode] = useState(initialInputMode);
+  let inputElement = useRef<HTMLInputElement>(null);
+
   // The current English word to get sounds from, if in english input mode
   let [english, setEnglish] = useState("");
   // The currently selected sound choice, in case there's more than one for a word
   let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
 
-  let choices =
-    inputMode === InputMode.ENGLISH
-      ? soundChoicesForEnglish(english, gameState.columns)
-      : [];
-  let choiceListRows = choices.map((choice, index) =>
-    makeChoiceBlocks(choice, gameState.columns, index === currentSoundChoice)
-  );
+  let soundChoices = soundChoicesForEnglish(english, gameState.columns);
+  let [choices, setChoices] = useState<WordSound[]>([]);
+  let [choiceListRows, setChoiceListRows] = useState<JSX.Element[][]>();
+
+  useEffect(() => {
+    soundChoices.then(choices => [setChoices(choices)]);
+    soundChoices.then(choices =>
+      setChoiceListRows(
+        choices.map((choice, index) =>
+          makeChoiceBlocks(
+            choice,
+            matchMap,
+            gameState.columns,
+            index === currentSoundChoice
+          )
+        )
+      )
+    );
+  }, [english, currentSoundChoice]);
 
   // Is this the ideal way to do this?
+  // Trying deal with async and state...
   useEffect(() => {
-    // Sets the input shown on the board
-    gameActionDispatcher({
-      type: GameEvent.Input,
-      input: choices[currentSoundChoice],
+    soundChoices.then(choices => {
+      if (!english) {
+        gameActionDispatcher({
+          type: GameEvent.INPUT,
+          input: [],
+        });
+        return;
+      }
+      // Sets the input shown on the board
+      gameActionDispatcher({
+        type: GameEvent.INPUT,
+        input: choices[currentSoundChoice] || [],
+      });
     });
   }, [currentSoundChoice, english]);
 
-  if (gameState.gameOver) {
-    return <div></div>;
-  }
-
-  if (inputMode === InputMode.ENGLISH) {
-    // English keyboard
-
-    // Handle the text field changing
-    let handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
-      target,
-    }) => {
-      // Only allow alphabetic, dash and apostrophe characters
-      let value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
-      setEnglish(value);
-      setCurrentSoundChoice(0);
-    };
-
-    // Handle a key press in the page
-    let handleKeyDown: React.KeyboardEventHandler = event => {
-      if (keyGoesUp(event.key)) {
-        setCurrentSoundChoice(current =>
-          choices.length
-            ? current - 1 < 0
-              ? choices.length - 1
-              : current - 1
-            : current
-        );
-      } else if (keyGoesDown(event.key)) {
-        setCurrentSoundChoice(current =>
-          choices.length
-            ? current + 1 >= choices.length
-              ? 0
-              : current + 1
-            : current
-        );
-      } else if (event.key === "Enter") {
-        setEnglish("");
-        gameActionDispatcher({ type: GameEvent.Commit });
+  useEffect(() => {
+    let listener = () => {
+      // Focus on the input element in case it's not in focus
+      if (
+        inputElement.current &&
+        document.activeElement !== inputElement.current
+      ) {
+        inputElement.current.focus();
       }
     };
+    window.addEventListener("keydown", listener);
+    () => removeEventListener("keydown", listener);
+  }, []);
 
-    // Handle clicking on the choice list
-    let handleOnClick = (soundChoice: number) => {
-      setCurrentSoundChoice(soundChoice);
-    };
+  // Handle the text field changing
+  let handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
+    target,
+  }) => {
+    // Only allow alphabetic, dash and apostrophe characters
+    let value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
+    setEnglish(value);
+    setCurrentSoundChoice(0);
+  };
 
-    return (
-      <div className="w-full flex flex-col gap-1 items-center">
+  // Handle a key press in the page
+  let handleKeyDown: React.KeyboardEventHandler = event => {
+    if (!choices || !choices.length) {
+      return;
+    }
+    if (keyGoesUp(event.key)) {
+      setCurrentSoundChoice(current =>
+        choices.length
+          ? current - 1 < 0
+            ? choices.length - 1
+            : current - 1
+          : current
+      );
+    } else if (keyGoesDown(event.key)) {
+      setCurrentSoundChoice(current =>
+        choices.length
+          ? current + 1 >= choices.length
+            ? 0
+            : current + 1
+          : current
+      );
+    } else if (event.key === "Enter") {
+      commit();
+    }
+  };
+
+  let commit = () => {
+    if (!choices) {
+      return;
+    }
+    setEnglish("");
+    gameActionDispatcher({ type: GameEvent.COMMIT });
+  };
+
+  // Handle clicking on the choice list
+  let handleOnClick = (soundChoice: number) => {
+    setCurrentSoundChoice(soundChoice);
+  };
+
+  return (
+    <div className="w-72 mx-auto flex flex-col gap-1 items-center">
+      <div className="flex flex-row border-2 border-gray-100 w-full items-stretch">
         <input
           type="text"
           value={english}
-          className="w-2/5 p-1 pb-0 border-b-2 border-gray-200 focus:outline-none uppercase font-bold text-center"
+          className="w-48 p-1 pr-3 focus:outline-none uppercase font-bold text-right grow placeholder:text-gray-300 text-gray-600"
           onChange={handleOnChange}
           onKeyDown={handleKeyDown}
+          maxLength={12}
+          ref={inputElement}
+          placeholder={"guess"}
         />
-        <ul className="w-full flex flex-col gap-2">
-          {choiceListRows.map((soundBlocks, index) => (
-            <li
-              key={index}
-              className="flex flex-row gap-0.5"
-              onClick={() => handleOnClick(index)}
-            >
-              {soundBlocks}
-            </li>
-          ))}
-        </ul>
+        <button
+          onClick={commit}
+          className="bg-white px-2 text-red-400 border-l-2 border-gray-100 px-4 font-bold"
+          type="button"
+        >
+          PLAY
+        </button>
       </div>
-    );
-  } else {
-    // Sound keyboard (TODO)
-  }
-
-  return <div></div>;
-};
-
-const KEY_BASE_STYLE =
-  "rounded-sm px-2 h-16 bg-gray-200 text-gray-800 flex-1 text-center flex flex-col leading-none select-none justify-center";
-const KEY_HEAD_STYLE = "text-xl font-normal";
-const KEY_IPA_STYLE = "text-xs opacity-75 leading-none";
-
-const keyStyleMap = {
-  [Match.NO_MATCH]: "",
-  [Match.SOME_MATCH]: "",
-  [Match.MATCH]: "",
-};
-
-export interface KeyProps {
-  head?: string;
-  sub?: string;
-  width?: number;
-}
-
-export const Key = ({
-  head = undefined,
-  sub = undefined,
-  width = 1,
-}: KeyProps) => {
-  if (head) {
-    return (
-      <div className={`${KEY_BASE_STYLE}`} style={{ flexGrow: width }}>
-        <b className={KEY_HEAD_STYLE}>{head}</b>
-        {sub ? <small className={KEY_IPA_STYLE}>{sub}</small> : null}
-      </div>
-    );
-  } else {
-    return (
-      <div className={`${KEY_BASE_STYLE}`} style={{ flexGrow: width }}></div>
-    );
-  }
+      <ul className="w-full flex flex-col gap-1 h-20 p-1 border-2 border-gray-100 bg-white">
+        {choiceListRows
+          ? choiceListRows.map((soundBlocks, index) => (
+              <li
+                key={index}
+                className="flex flex-row gap-0.5"
+                onClick={() => handleOnClick(index)}
+              >
+                {soundBlocks}
+              </li>
+            ))
+          : null}
+      </ul>
+    </div>
+  );
 };

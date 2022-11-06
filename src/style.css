@@ -3,3 +3,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    background: url('./265_t.png') no-repeat white bottom right fixed;
+    background-size: 25%;
+}
+
+@media (max-width > 300) {
+    :root {
+        font-size: 32px;
+    }
+}

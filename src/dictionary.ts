@@ -1,29 +1,34 @@
-import DICT from "./dict.json";
 import Sound, { SoundKey, WordSound } from "./sound";
+
+const DICT = import("./dict.json");
 
 type RawTranscription = string;
 export type Transcription = SoundKey[];
 
 export class Dictionary {
-  private readonly rawTranscriptionsMap: Map<string, RawTranscription[]>;
+  private readonly rawTranscriptionsMap: Promise<
+    Map<string, RawTranscription[]>
+  >;
   private cache = new Map();
-  public readonly words: Set<string>;
+  public readonly words: Promise<Set<string>>;
 
-  constructor(wordTranscriptions: Iterable<[string, RawTranscription[]]>) {
-    this.rawTranscriptionsMap = new Map(wordTranscriptions);
-    this.words = new Set(this.rawTranscriptionsMap.keys());
+  constructor(json: Promise<object>) {
+    this.rawTranscriptionsMap = json
+      .then(dict => Object.entries(dict))
+      .then(entries => new Map(entries));
+    this.words = this.rawTranscriptionsMap.then(rt => new Set(rt.keys()));
   }
 
   private transcriptionToWordSound(transcription: string): WordSound {
     return transcription.split(" ").map(key => Sound.from(key as SoundKey)!);
   }
 
-  public wordSounds(english: string): WordSound[] {
+  public async wordSounds(english: string): Promise<WordSound[]> {
     if (this.cache.has(english)) {
       return this.cache.get(english);
     } else {
       let sounds =
-        this.rawTranscriptionsMap
+        (await this.rawTranscriptionsMap)
           .get(english)
           ?.map(this.transcriptionToWordSound) ?? [];
       this.cache.set(english, sounds);
@@ -31,9 +36,11 @@ export class Dictionary {
     }
   }
 
-  public filterByLength(length: number) {
+  public async filterByLength(length: number) {
     let pool = new Map();
-    for (let [word, rawTranscriptions] of this.rawTranscriptionsMap.entries()) {
+    for (let [word, rawTranscriptions] of (
+      await this.rawTranscriptionsMap
+    ).entries()) {
       let wordSounds = rawTranscriptions
         .map(this.transcriptionToWordSound)
         .filter(ws => ws.length === length);
@@ -47,4 +54,4 @@ export class Dictionary {
   }
 }
 
-export const englishDictionary = new Dictionary(Object.entries(DICT) as any);
+export const englishDictionary = new Dictionary(DICT);
