@@ -2,6 +2,7 @@
   "name": "wurdul",
   "version": "1.0.2",
   "source": "src/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel",
     "build": "parcel build",
