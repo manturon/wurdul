@@ -15,20 +15,24 @@ export const App = () => {
     let now = new Date();
     getAnswerForDate(now).then(answer => {
       setAnswer(answer);
-      console.log(
-        `Answer: ${answer.sound.map(sound => sound.name).join("-")} (${
-          answer.word
-        })`
-      );
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(
+          `Answer: ${answer.sound.map(sound => sound.name).join("-")} (${
+            answer.word
+          })`
+        );
+      }
     });
   }, []);
 
   useEffect(() => {
-    window["setAnswer"] = (word: string) => {
-      getAnswerForWord(word).then(answer =>
-        answer ? setAnswer(answer) : void 0
-      );
-    };
+    if (process.env.NODE_ENV !== 'production') {
+      window["setAnswer"] = (word: string) => {
+        getAnswerForWord(word).then(answer =>
+          answer ? setAnswer(answer) : void 0
+        );
+      };
+    }
   }, []);
 
   if (answer) {
