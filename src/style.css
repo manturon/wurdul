@@ -1,11 +1,45 @@
-@import url("https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,200;0,400;0,500;0,600;0,700;0,800;1,200;1,400;1,500;1,600;1,700;1,800&display=swap");
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans Regular'),
+         url('../assets/FiraSans-Regular.woff') format('woff'),
+         url('../assets/FiraSans-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans Medium'),
+         url('../assets/FiraSans-Medium.woff') format('woff'),
+         url('../assets/FiraSans-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans Bold'),
+         url('../assets/FiraSans-Bold.woff') format('woff'),
+         url('../assets/FiraSans-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: 'Fira Sans';
+    src: local('Fira Sans ExtraBold'),
+         url('../assets/FiraSans-ExtraBold.woff') format('woff'),
+         url('../assets/FiraSans-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-    background: url('./265_t.png') no-repeat white bottom right fixed;
+    background: url('../assets/265_t.png') no-repeat white bottom right fixed;
     background-size: 25%;
 }
 
