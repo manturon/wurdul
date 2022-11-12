@@ -16,29 +16,24 @@ export const GameContext = createContext<
 
 export type WurdulProps = GameConfig;
 
-export const Wurdul = ({ answer, rows, columns }: WurdulProps) => {
+export const Wurdul = ({ answer, rows }: WurdulProps) => {
   let [state, dispatcher] = useReducer(gameStateReducer, {
     ...initialGameState,
     answer,
     rows,
-    columns,
   });
 
   useEffect(() => {
-    dispatcher({ type: GameEvent.RESET, config: { answer, rows, columns } });
-  }, [answer, rows, columns]);
+    dispatcher({ type: GameEvent.RESET, config: { answer, rows } });
+  }, [answer, rows]);
 
   return (
     <GameContext.Provider value={[state, dispatcher]}>
       <div className="container mx-auto">
-        {answer ? (
-          <div className="md:w-3/5 flex flex-col mx-auto py-2 justify-center gap-1 py-2">
-            <Board />
-            <Keyboard />
-          </div>
-        ) : (
-          <div className="w-72 mx-auto text-right">Loading dictionary...</div>
-        )}
+        <div className="md:w-3/5 flex flex-col mx-auto py-2 justify-center gap-1 py-2">
+          <Board />
+          <Keyboard />
+        </div>
       </div>
     </GameContext.Provider>
   );

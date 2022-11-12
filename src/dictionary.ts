@@ -1,6 +1,11 @@
 import Sound, { SoundKey, WordSound } from "./sound";
 
-const DICT = import("./dict.json");
+const DICT = import("./dict.json") as object as Promise<
+  Record<string, string[]>
+>;
+const ANSWERS = import("./answers.json") as object as Promise<
+  [string, string[]][]
+>;
 
 type RawTranscription = string;
 export type Transcription = SoundKey[];
@@ -9,18 +14,43 @@ export class Dictionary {
   private readonly rawTranscriptionsMap: Promise<
     Map<string, RawTranscription[]>
   >;
+  private readonly answers: Promise<[string, RawTranscription[]][]>;
   private cache = new Map();
   public readonly words: Promise<Set<string>>;
 
-  constructor(json: Promise<object>) {
-    this.rawTranscriptionsMap = json
+  constructor(
+    dict: Promise<Record<string, string[]>>,
+    answers: Promise<[string, string[]][]>
+  ) {
+    this.rawTranscriptionsMap = dict
       .then(dict => Object.entries(dict))
       .then(entries => new Map(entries));
+    this.answers = Promise.all([this.rawTranscriptionsMap, answers]).then(
+      ([dict, rawAnswers]) => {
+        let answers: Map<string, RawTranscription[]> = new Map(rawAnswers);
+        // Overwrite the entries in common from dict with the ones in answers
+        // Hopefully temporary...
+        for (let [key, value] of answers) {
+          dict.set(key, value);
+        }
+        return rawAnswers;
+      }
+    );
     this.words = this.rawTranscriptionsMap.then(rt => new Set(rt.keys()));
   }
 
-  private transcriptionToWordSound(transcription: string): WordSound {
+  public rawTranscriptionToWordSound(transcription: string): WordSound {
     return transcription.split(" ").map(key => Sound.from(key as SoundKey)!);
+  }
+
+  public async getAnswer(
+    index: number,
+    subindex: number
+  ): Promise<[string, RawTranscription] | undefined> {
+    let answers = await this.answers;
+    let [word, wordSounds] = answers.at(index % answers.length) ?? [];
+    let wordSound = wordSounds?.at(subindex % wordSounds.length);
+    return word && wordSound ? [word, wordSound] : undefined;
   }
 
   public async wordSounds(english: string): Promise<WordSound[]> {
@@ -30,7 +60,7 @@ export class Dictionary {
       let sounds =
         (await this.rawTranscriptionsMap)
           .get(english)
-          ?.map(this.transcriptionToWordSound) ?? [];
+          ?.map(this.rawTranscriptionToWordSound) ?? [];
       this.cache.set(english, sounds);
       return sounds;
     }
@@ -42,7 +72,7 @@ export class Dictionary {
       await this.rawTranscriptionsMap
     ).entries()) {
       let wordSounds = rawTranscriptions
-        .map(this.transcriptionToWordSound)
+        .map(this.rawTranscriptionToWordSound)
         .filter(ws => ws.length === length);
       if (wordSounds.length) {
         for (let wordSound of wordSounds) {
@@ -54,4 +84,4 @@ export class Dictionary {
   }
 }
 
-export const englishDictionary = new Dictionary(DICT);
+export const englishDictionary = new Dictionary(DICT, ANSWERS);

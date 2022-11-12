@@ -66,8 +66,9 @@ const makeMatchStateTable = matchState => {
  * Handle user input, present choices and show current match state for sounds.
  */
 export const Keyboard = () => {
-  let [gameState, gameActionDispatcher] = useContext(GameContext);
-  let matchMap = getSoundMatchStatus(gameState.history);
+  let [{ answer, history }, gameActionDispatcher] = useContext(GameContext);
+
+  let matchMap = getSoundMatchStatus(history);
 
   let inputElement = useRef<HTMLInputElement>(null);
 
@@ -76,7 +77,7 @@ export const Keyboard = () => {
   // The currently selected sound choice, in case there's more than one for a word
   let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
 
-  let soundChoices = soundChoicesForEnglish(english, gameState.columns);
+  let soundChoices = soundChoicesForEnglish(english, answer!.sound.length);
   let [choices, setChoices] = useState<WordSound[]>([]);
   let [choiceListRows, setChoiceListRows] = useState<JSX.Element[][]>();
 
@@ -88,7 +89,7 @@ export const Keyboard = () => {
           makeChoiceBlocks(
             choice,
             matchMap,
-            gameState.columns,
+            answer!.sound.length,
             index === currentSoundChoice
           )
         )

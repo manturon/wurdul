@@ -14,7 +14,7 @@ const HEAD_BASE_STYLE = "block mx-auto text-center uppercase";
 
 const NORMAL_SIZE_STYLE = "w-14 border-2 text-xl font-bold tracking-tight";
 const BIG_SIZE_STYLE = "w-20 border-4 text-3xl font-black tracking-wider";
-const SMALL_SIZE_STYLE = "w-7 border text-xs font-medium";
+const SMALL_SIZE_STYLE = "w-10 border text-sm font-medium";
 
 const KEY_BASE_STYLE = "text-sm font-medium";
 const KEY_NORMAL_SIZE_STYLE = "h-5 w-12";
