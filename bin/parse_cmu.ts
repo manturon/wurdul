@@ -165,11 +165,15 @@ const main = () => {
       return;
     }
 
-    let match = line.match(/([\.'_a-z-]+)(\(\d+\))?\s((?:\s\w+\d?)+)/);
+    let match = line.match(/([\.\d'_a-z-]+)(\(\d+\))?\s((?:\s\w+\d?)+)/);
     if (match) {
       let { 1: head, 2: repeat, 3: keys } = match;
 
-      if (filter && filter.has(head)) {
+      if (/[\d]/.test(head)) {
+        return;
+      }
+
+      if (filter && !filter.has(head)) {
         return;
       }
 

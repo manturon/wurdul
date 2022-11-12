@@ -1,17 +1,16 @@
 import { ReactNode } from "react";
 import { englishDictionary } from "./dictionary";
-import Sound, { SoundKey, WordSound } from "./sound";
+import Sound, { WordSound } from "./sound";
 
 export const DICTIONARY = englishDictionary;
 
 export const DEFAULT_ROWS = 6;
-export const DEFAULT_COLUMNS = 5;
 
 export type GuessMatch = [Sound, Match];
 export type GuessResult = GuessMatch[];
 export type GuessHistory = GuessResult[];
 export type SoundMatchStatus = Map<Sound, Match>;
-export type Answer = [sound: WordSound, english: string];
+export type Answer = { sound: WordSound; word: string, day?: number };
 
 export enum Match {
   UNKNOWN = "unknown",
@@ -37,12 +36,12 @@ export type GameAction =
     };
 
 export interface GameState {
-  answer: Answer | null;
+  answer: Answer;
   input: WordSound;
   history: GuessHistory;
   rows: number;
-  columns: number;
   gameOver: boolean;
+  won: boolean;
   info?: ReactNode;
 }
 
@@ -50,7 +49,7 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
   state,
   action
 ) => {
-  let { columns, input, answer, history } = state;
+  let { input, answer, history, rows } = state;
   switch (action.type) {
     case GameEvent.INFO:
       return { ...state, info: action.message || undefined };
@@ -67,16 +66,28 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
         };
       }
       let guess = input;
-      if (guess.length === columns) {
-        let matchResult = matchGuess(answer!, guess);
-        let newHistory = [...history, matchResult];
-        let gameOver = history.length === columns;
-        return {
-          ...state,
-          input: [],
-          history: newHistory,
-          gameOver,
-        };
+      if (answer) {
+        if (guess.length === answer.sound.length) {
+          let matchResult = matchGuess(answer!, guess);
+          let newHistory = [...history, matchResult];
+
+          let gameOver = false;
+          let won = false;
+          if (isAllMatch(matchResult)) {
+            won = true;
+            gameOver = true;
+          } else {
+            gameOver = newHistory.length === rows;
+          }
+
+          return {
+            ...state,
+            won,
+            input: [],
+            history: newHistory,
+            gameOver,
+          };
+        }
       }
       return state;
     }
@@ -85,37 +96,49 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
   }
 };
 
-export const initialGameState: GameState = {
-  answer: null,
+export const initialGameState: Omit<GameState, "answer"> = {
   rows: DEFAULT_ROWS,
-  columns: DEFAULT_COLUMNS,
   input: [],
   history: [],
   gameOver: false,
+  won: false,
 };
 
-const answersMap = new Map();
+export const WURDUL_EPOCH = new Date(2022, 10, 12);
 
-export const getAnswerByDate = async (
-  columns: number,
-  timestamp: number
-): Promise<Answer> => {
-  let pool: Map<string, WordSound[]>;
-  if (!answersMap.has(columns)) {
-    pool = await DICTIONARY.filterByLength(columns);
-    answersMap.set(columns, pool);
-  } else {
-    pool = answersMap.get(columns);
+export const getWurdulDayForDate = (date: Date) =>
+  Math.floor((date.getTime() - WURDUL_EPOCH.getTime()) / 1000 / 60 / 60 / 24);
+
+export const getAnswerForDate = async (date: Date): Promise<Answer> => {
+  // Get number of days since the Wurdul Epoch
+  let index = getWurdulDayForDate(date);
+  let subindex = index;
+  let answer = await DICTIONARY.getAnswer(index, subindex);
+  if (!answer) {
+    throw new Error("Could not get answer for date: " + date);
   }
-  timestamp |= 0; // Force it to be an integer
-  let [word, wordSounds] = [...pool.entries()][timestamp % pool.size];
-  let wordSound = wordSounds[timestamp % wordSounds.length];
-  return [wordSound, word];
+  let [word, rawTranscription] = answer;
+  return {
+    sound: DICTIONARY.rawTranscriptionToWordSound(rawTranscription),
+    word,
+    day: index
+  };
+};
+
+export const getAnswerForWord = async (
+  word: string
+): Promise<Answer | null> => {
+  let wordSound = await DICTIONARY.wordSounds(word);
+  if (wordSound.length) {
+    return { sound: wordSound[0], word };
+  } else {
+    return null;
+  }
 };
 
 export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
-  let wordSoundAnswer = answer[0];
-  let soundCount = wordSoundAnswer.reduce(
+  let { sound } = answer;
+  let soundCount = sound.reduce(
     (previous, current) => ({
       ...previous,
       [current.name]: (previous[current.name] ?? 0) + 1,
@@ -124,10 +147,10 @@ export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
   );
   return guess
     .map((guessedSound, index): GuessMatch => {
-      if (wordSoundAnswer.length < index) {
+      if (sound.length < index) {
         return [guessedSound, Match.NO_MATCH];
       }
-      let expectedSound = wordSoundAnswer[index];
+      let expectedSound = sound[index];
       if (guessedSound.is(expectedSound)) {
         soundCount[guessedSound.name] -= 1;
         return [guessedSound, Match.MATCH];
@@ -147,15 +170,8 @@ export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
     });
 };
 
-export const getAnswerForWord = async (
-  word: string
-): Promise<Answer | null> => {
-  let wordSound = await DICTIONARY.wordSounds(word);
-  if (wordSound.length) {
-    return [wordSound[0], word];
-  } else {
-    return null;
-  }
+export const isAllMatch = function (matchMap: GuessResult) {
+  return matchMap.every(match => match[1] === Match.MATCH);
 };
 
 const ALL_UNKNOWN_MATCH = new Map(
@@ -182,7 +198,6 @@ export const getSoundMatchStatus = (
 };
 
 export interface GameConfig {
-  answer: Answer | null;
+  answer: Answer;
   rows: number;
-  columns: number;
 }
