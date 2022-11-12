@@ -9,11 +9,11 @@ export enum BlockSize {
 }
 
 const BASE_STYLE =
-  "flex flex-row items-center overflow-hidden relative select-none";
+  "flex flex-row items-center overflow-hidden relative select-none grow";
 const HEAD_BASE_STYLE = "block mx-auto text-center uppercase";
 
 const NORMAL_SIZE_STYLE = "w-14 border-2 text-xl font-bold tracking-tight";
-const BIG_SIZE_STYLE = "w-20 border-4 text-3xl font-black tracking-wider";
+const BIG_SIZE_STYLE = "h-14 border-2 text-3xl font-black tracking-wider";
 const SMALL_SIZE_STYLE = "w-10 border text-sm font-medium";
 
 const KEY_BASE_STYLE = "text-sm font-medium";
@@ -78,9 +78,9 @@ export const Block = (props: BlockProps) => {
   size ??= BlockSize.NORMAL;
   if (props.type === BlockType.INFO) {
     let { value, tag, match, title } = props;
-    let style = `aspect-square ${BASE_STYLE} ${MATCH_STYLE_MAP.get(
-      match
-    )} ${SIZE_STYLE_MAP.get(size)}`;
+    let style = `${
+      size != BlockSize.BIG ? "aspect-square" : ""
+    } ${BASE_STYLE} ${MATCH_STYLE_MAP.get(match)} ${SIZE_STYLE_MAP.get(size)}`;
     return (
       <div
         className={style}
@@ -105,9 +105,9 @@ export const Block = (props: BlockProps) => {
     );
   } else if (props.type === BlockType.INPUT) {
     let { value } = props;
-    let style = `aspect-square ${BASE_STYLE} ${INPUT_STYLE} ${SIZE_STYLE_MAP.get(
-      size
-    )}`;
+    let style = `${
+      size != BlockSize.BIG ? "aspect-square" : ""
+    } ${BASE_STYLE} ${INPUT_STYLE} ${SIZE_STYLE_MAP.get(size)}`;
     return (
       <div className={style}>
         <span className={HEAD_BASE_STYLE}>{value}</span>
@@ -125,9 +125,9 @@ export const Block = (props: BlockProps) => {
     );
   } else {
     // Empty block
-    let style = `aspect-square ${BASE_STYLE} ${EMPTY_STYLE} ${SIZE_STYLE_MAP.get(
-      size
-    )}`;
+    let style = `${
+      size != BlockSize.BIG ? "aspect-square" : ""
+    } ${BASE_STYLE} ${EMPTY_STYLE} ${SIZE_STYLE_MAP.get(size)}`;
     return <div className={style}></div>;
   }
 };

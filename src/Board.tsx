@@ -24,7 +24,8 @@ const makeBlockInfo = (asin: string[]) => (
 
 const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
   let blocks: JSX.Element[];
-  let size = cols > 5 ? BlockSize.SMALL : BlockSize.NORMAL;
+  let size =
+    cols > 5 ? BlockSize.SMALL : cols < 4 ? BlockSize.BIG : BlockSize.NORMAL;
   if (typeof guess === "object") {
     if (guess.length > cols) {
       guess = guess.slice(0, cols);
@@ -46,14 +47,21 @@ const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
     } else {
       // It's the current user input
       blocks = (guess as WordSound).map((sound, index) => (
-        <Block key={index} type={BlockType.INPUT} value={sound.name} size={size} />
+        <Block
+          key={index}
+          type={BlockType.INPUT}
+          value={sound.name}
+          size={size}
+        />
       ));
     }
 
     if (cols) {
       let start = guess.length;
       let n = cols - start;
-      let fill = rangeMap(n, index => <Block key={start + index} size={size} />);
+      let fill = rangeMap(n, index => (
+        <Block key={start + index} size={size} />
+      ));
       blocks.push(...fill);
     }
   } else {
@@ -99,7 +107,10 @@ export const Board = () => {
         ) : null
       }
       {blockRows.map((blocks, key) => (
-        <div key={key} className="flex flex-row gap-1 max-w-full">
+        <div
+          key={key}
+          className="flex flex-row gap-1 max-w-full w-full place-content-evenly"
+        >
           {blocks}
         </div>
       ))}
