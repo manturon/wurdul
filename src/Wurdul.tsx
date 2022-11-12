@@ -9,6 +9,7 @@ import {
   initialGameState,
 } from "./game";
 import { Keyboard } from "./Keyboard";
+import TheAnswer from "./TheAnswer";
 
 export const GameContext = createContext<
   [GameState, React.Dispatch<GameAction>]
@@ -32,7 +33,7 @@ export const Wurdul = ({ answer, rows }: WurdulProps) => {
       <div className="container mx-auto">
         <div className="md:w-3/5 flex flex-col mx-auto py-2 justify-center gap-1 py-2">
           <Board />
-          <Keyboard />
+          {state.gameOver ? <TheAnswer /> : <Keyboard />}
         </div>
       </div>
     </GameContext.Provider>

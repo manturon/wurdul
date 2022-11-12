@@ -7,6 +7,8 @@ import {
 } from "./game";
 import { Wurdul } from "./Wurdul";
 
+export const WEBSITE = 'http://manturon.github.io/wurdul';
+
 export const App = () => {
   let rows = DEFAULT_ROWS;
   let [answer, setAnswer] = useState<Answer | null>(null);

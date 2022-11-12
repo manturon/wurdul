@@ -5,7 +5,7 @@ import { WordSound } from "./sound";
 import { rangeMap } from "./util";
 import { GameContext } from "./Wurdul";
 
-const makeBlockInfo = (asin: string[]) => (
+export const makeBlockInfo = (asin: string[]) => (
   <Fragment>
     Like in:{" "}
     {asin.map((ex: string, index: number, { length }) => {
@@ -75,8 +75,9 @@ const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
  */
 export const Board = () => {
   let [gameState, dispatchGameAction] = useContext(GameContext);
-  let { history, input, rows, answer, gameOver } = gameState;
+  let { history, input, rows, answer, gameOver, won } = gameState;
 
+  history = won ? history.slice(0, history.length - 1) : history;
   // Rows from previous guesses
   let playedRows = history.map(guess => makeRow(answer.sound.length, guess));
   // Current player input row

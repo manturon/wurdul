@@ -10,7 +10,7 @@ export type GuessMatch = [Sound, Match];
 export type GuessResult = GuessMatch[];
 export type GuessHistory = GuessResult[];
 export type SoundMatchStatus = Map<Sound, Match>;
-export type Answer = { sound: WordSound; word: string };
+export type Answer = { sound: WordSound; word: string, day?: number };
 
 export enum Match {
   UNKNOWN = "unknown",
@@ -41,6 +41,7 @@ export interface GameState {
   history: GuessHistory;
   rows: number;
   gameOver: boolean;
+  won: boolean;
   info?: ReactNode;
 }
 
@@ -65,19 +66,28 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
         };
       }
       let guess = input;
-      if (answer && guess.length === answer.sound.length) {
-        let matchResult = matchGuess(answer!, guess);
-        let newHistory = [...history, matchResult];
-        let gameOver = newHistory.length === rows;
-        if (gameOver) {
-          console.log("Game over!");
+      if (answer) {
+        if (guess.length === answer.sound.length) {
+          let matchResult = matchGuess(answer!, guess);
+          let newHistory = [...history, matchResult];
+
+          let gameOver = false;
+          let won = false;
+          if (isAllMatch(matchResult)) {
+            won = true;
+            gameOver = true;
+          } else {
+            gameOver = newHistory.length === rows;
+          }
+
+          return {
+            ...state,
+            won,
+            input: [],
+            history: newHistory,
+            gameOver,
+          };
         }
-        return {
-          ...state,
-          input: [],
-          history: newHistory,
-          gameOver,
-        };
       }
       return state;
     }
@@ -91,15 +101,19 @@ export const initialGameState: Omit<GameState, "answer"> = {
   input: [],
   history: [],
   gameOver: false,
+  won: false,
 };
 
-const WURDUL_EPOCH = new Date(2022, 10, 12);
+export const WURDUL_EPOCH = new Date(2022, 10, 12);
+
+export const getWurdulDayForDate = (date: Date) =>
+  Math.floor((date.getTime() - WURDUL_EPOCH.getTime()) / 1000 / 60 / 60 / 24);
 
 export const getAnswerForDate = async (date: Date): Promise<Answer> => {
   // Get number of days since the Wurdul Epoch
-  let difference =
-    Math.floor(date.getTime() - WURDUL_EPOCH.getTime()) / 1000 / 60 / 60 / 24;
-  let answer = await DICTIONARY.getAnswer(difference, date.getDay());
+  let index = getWurdulDayForDate(date);
+  let subindex = index;
+  let answer = await DICTIONARY.getAnswer(index, subindex);
   if (!answer) {
     throw new Error("Could not get answer for date: " + date);
   }
@@ -107,6 +121,7 @@ export const getAnswerForDate = async (date: Date): Promise<Answer> => {
   return {
     sound: DICTIONARY.rawTranscriptionToWordSound(rawTranscription),
     word,
+    day: index
   };
 };
 
@@ -153,6 +168,10 @@ export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
         return [guessedSound, Match.NO_MATCH];
       }
     });
+};
+
+export const isAllMatch = function (matchMap: GuessResult) {
+  return matchMap.every(match => match[1] === Match.MATCH);
 };
 
 const ALL_UNKNOWN_MATCH = new Map(
