@@ -1,6 +1,6 @@
 # Wurdul
 
-Wordle clone where you have you guess the pronunciation of the word instead.
+Wordle clone where you have to guess the pronunciation of the word instead.
 
 ## Building
 
