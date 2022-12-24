@@ -1,6 +1,7 @@
-node_modules
+node_modules/
+dist/
+
 package-lock.json
 
-/.parcel-cache
-/dist
+.parcel-cache/
 .*.*.swp
