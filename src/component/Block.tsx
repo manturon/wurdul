@@ -73,12 +73,12 @@ export type BlockProps = { size?: BlockSize; title?: () => ReactNode } & (
  * A block that contains a guess outcome, current player input or nothing.
  */
 export const Block = (props: BlockProps) => {
-  let [gameState, dispatchGameAction] = useContext(GameContext);
+  const [gameState, dispatchGameAction] = useContext(GameContext);
   let { size } = props;
   size ??= BlockSize.NORMAL;
   if (props.type === BlockType.INFO) {
-    let { value, tag, match, title } = props;
-    let style = `${
+    const { value, tag, match, title } = props;
+    const style = `${
       size != BlockSize.BIG ? "aspect-square" : ""
     } ${BASE_STYLE} ${MATCH_STYLE_MAP.get(match)} ${SIZE_STYLE_MAP.get(size)}`;
     return (
@@ -89,7 +89,7 @@ export const Block = (props: BlockProps) => {
             ? () => {
                 dispatchGameAction({ type: GameEvent.INFO, message: title!() });
               }
-            : () => {}
+            : undefined
         }
         onMouseLeave={() =>
           dispatchGameAction({ type: GameEvent.INFO, message: undefined })
@@ -104,8 +104,8 @@ export const Block = (props: BlockProps) => {
       </div>
     );
   } else if (props.type === BlockType.INPUT) {
-    let { value } = props;
-    let style = `${
+    const { value } = props;
+    const style = `${
       size != BlockSize.BIG ? "aspect-square" : ""
     } ${BASE_STYLE} ${INPUT_STYLE} ${SIZE_STYLE_MAP.get(size)}`;
     return (
@@ -114,8 +114,8 @@ export const Block = (props: BlockProps) => {
       </div>
     );
   } else if (props.type === BlockType.KEY) {
-    let { value, match } = props;
-    let style = `${BASE_STYLE} ${KEY_BASE_STYLE} ${KEY_SIZE_STYLE_MAP.get(
+    const { value, match } = props;
+    const style = `${BASE_STYLE} ${KEY_BASE_STYLE} ${KEY_SIZE_STYLE_MAP.get(
       size
     )} ${match ? MATCH_STYLE_MAP.get(match) : KEY_INPUT_STYLE}`;
     return (
@@ -125,7 +125,7 @@ export const Block = (props: BlockProps) => {
     );
   } else {
     // Empty block
-    let style = `${
+    const style = `${
       size != BlockSize.BIG ? "aspect-square" : ""
     } ${BASE_STYLE} ${EMPTY_STYLE} ${SIZE_STYLE_MAP.get(size)}`;
     return <div className={style}></div>;

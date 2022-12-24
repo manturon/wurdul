@@ -9,7 +9,7 @@ export const makeBlockInfo = (asin: string[]) => (
   <Fragment>
     Like in:{" "}
     {asin.map((ex: string, index: number, { length }) => {
-      let { 1: left, 2: mark, 3: right } = /(\w*)\[(\w+)\](\w*)/.exec(ex)!;
+      const { 1: left, 2: mark, 3: right } = /(\w*)\[(\w+)\](\w*)/.exec(ex)!;
       return (
         <Fragment key={index}>
           {left}
@@ -24,7 +24,7 @@ export const makeBlockInfo = (asin: string[]) => (
 
 const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
   let blocks: JSX.Element[];
-  let size =
+  const size =
     cols > 5 ? BlockSize.SMALL : cols < 4 ? BlockSize.BIG : BlockSize.NORMAL;
   if (typeof guess === "object") {
     if (guess.length > cols) {
@@ -57,9 +57,9 @@ const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
     }
 
     if (cols) {
-      let start = guess.length;
-      let n = cols - start;
-      let fill = rangeMap(n, index => (
+      const start = guess.length;
+      const n = cols - start;
+      const fill = rangeMap(n, index => (
         <Block key={start + index} size={size} />
       ));
       blocks.push(...fill);
@@ -74,24 +74,25 @@ const makeRow = (cols: number, guess?: GuessResult | WordSound) => {
  * A board with rows of blocks that contain the guesses, the current input or nothing.
  */
 export const Board = () => {
-  let [gameState, dispatchGameAction] = useContext(GameContext);
-  let { history, input, rows, answer, gameOver, won } = gameState;
+  const [gameState] = useContext(GameContext);
+  const { input, rows, answer, gameOver, won } = gameState;
+  let history = gameState.history;
 
   history = won ? history.slice(0, history.length - 1) : history;
   // Rows from previous guesses
-  let playedRows = history.map(guess => makeRow(answer.sound.length, guess));
+  const playedRows = history.map(guess => makeRow(answer.sound.length, guess));
   // Current player input row
   let blockRows = [...playedRows];
 
   if (!gameOver && blockRows.length !== rows) {
-    let inputRow = makeRow(answer.sound.length, input);
+    const inputRow = makeRow(answer.sound.length, input);
     blockRows = [...blockRows, inputRow];
   }
 
   // Empty rows
-  let paddingRows = rows - blockRows.length;
+  const paddingRows = rows - blockRows.length;
   if (paddingRows > 0) {
-    let padding = rangeMap(rows - playedRows.length - 1, () =>
+    const padding = rangeMap(rows - playedRows.length - 1, () =>
       makeRow(answer.sound.length)
     );
     blockRows = [...blockRows, ...padding];

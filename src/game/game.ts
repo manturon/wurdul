@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { englishDictionary } from "./dictionary";
-import Sound, { WordSound } from "./sound";
+import Sound, { SoundKey, WordSound } from "./sound";
 
 export const DICTIONARY = englishDictionary;
 
@@ -10,7 +10,11 @@ export type GuessMatch = [Sound, Match];
 export type GuessResult = GuessMatch[];
 export type GuessHistory = GuessResult[];
 export type SoundMatchStatus = Map<Sound, Match>;
-export type Answer = { sound: WordSound; word: string, day?: number };
+export interface Answer {
+  sound: WordSound;
+  word: string;
+  day?: number;
+}
 
 export enum Match {
   UNKNOWN = "unknown",
@@ -49,15 +53,15 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
   state,
   action
 ) => {
-  let { input, answer, history, rows } = state;
+  const { input, answer, history, rows } = state;
   switch (action.type) {
     case GameEvent.INFO:
-      return { ...state, info: action.message || undefined };
+      return { ...state, info: action.message };
     case GameEvent.RESET:
       console.log("Reset!");
       return { ...initialGameState, ...action.config };
     case GameEvent.INPUT:
-      return { ...state, input: action.input || [] };
+      return { ...state, input: action.input };
     case GameEvent.COMMIT: {
       if (state.gameOver) {
         return {
@@ -65,29 +69,27 @@ export const gameStateReducer: React.Reducer<GameState, GameAction> = (
           input: [],
         };
       }
-      let guess = input;
-      if (answer) {
-        if (guess.length === answer.sound.length) {
-          let matchResult = matchGuess(answer!, guess);
-          let newHistory = [...history, matchResult];
+      const guess = input;
+      if (guess.length === answer.sound.length) {
+        const matchResult = matchGuess(answer!, guess);
+        const newHistory = [...history, matchResult];
 
-          let gameOver = false;
-          let won = false;
-          if (isAllMatch(matchResult)) {
-            won = true;
-            gameOver = true;
-          } else {
-            gameOver = newHistory.length === rows;
-          }
-
-          return {
-            ...state,
-            won,
-            input: [],
-            history: newHistory,
-            gameOver,
-          };
+        let gameOver = false;
+        let won = false;
+        if (isAllMatch(matchResult)) {
+          won = true;
+          gameOver = true;
+        } else {
+          gameOver = newHistory.length === rows;
         }
+
+        return {
+          ...state,
+          won,
+          input: [],
+          history: newHistory,
+          gameOver,
+        };
       }
       return state;
     }
@@ -111,24 +113,24 @@ export const getWurdulDayForDate = (date: Date) =>
 
 export const getAnswerForDate = async (date: Date): Promise<Answer> => {
   // Get number of days since the Wurdul Epoch
-  let index = getWurdulDayForDate(date);
-  let subindex = index;
-  let answer = await DICTIONARY.getAnswer(index, subindex);
+  const index = getWurdulDayForDate(date);
+  const subindex = index;
+  const answer = await DICTIONARY.getAnswer(index, subindex);
   if (!answer) {
     throw new Error("Could not get answer for date: " + date);
   }
-  let [word, rawTranscription] = answer;
+  const [word, rawTranscription] = answer;
   return {
     sound: DICTIONARY.rawTranscriptionToWordSound(rawTranscription),
     word,
-    day: index
+    day: index,
   };
 };
 
 export const getAnswerForWord = async (
   word: string
 ): Promise<Answer | null> => {
-  let wordSound = await DICTIONARY.wordSounds(word);
+  const wordSound = await DICTIONARY.wordSounds(word);
   if (wordSound.length) {
     return { sound: wordSound[0], word };
   } else {
@@ -137,8 +139,8 @@ export const getAnswerForWord = async (
 };
 
 export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
-  let { sound } = answer;
-  let soundCount = sound.reduce(
+  const { sound } = answer;
+  const soundCount = sound.reduce<Record<SoundKey, number>>(
     (previous, current) => ({
       ...previous,
       [current.name]: (previous[current.name] ?? 0) + 1,
@@ -150,7 +152,7 @@ export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
       if (sound.length < index) {
         return [guessedSound, Match.NO_MATCH];
       }
-      let expectedSound = sound[index];
+      const expectedSound = sound[index];
       if (guessedSound.is(expectedSound)) {
         soundCount[guessedSound.name] -= 1;
         return [guessedSound, Match.MATCH];
@@ -184,10 +186,10 @@ export const getSoundMatchStatus = (
   if (!history.length) {
     return ALL_UNKNOWN_MATCH;
   }
-  let matchMap = new Map(ALL_UNKNOWN_MATCH);
-  for (let entry of history) {
-    for (let [sound, match] of entry) {
-      let currentMatch = matchMap.get(sound);
+  const matchMap = new Map(ALL_UNKNOWN_MATCH);
+  for (const entry of history) {
+    for (const [sound, match] of entry) {
+      const currentMatch = matchMap.get(sound);
       if (currentMatch === Match.MATCH || currentMatch === Match.NO_MATCH) {
         continue;
       }

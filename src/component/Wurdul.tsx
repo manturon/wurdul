@@ -18,7 +18,7 @@ export const GameContext = createContext<
 export type WurdulProps = GameConfig;
 
 export const Wurdul = ({ answer, rows }: WurdulProps) => {
-  let [state, dispatcher] = useReducer(gameStateReducer, {
+  const [state, dispatcher] = useReducer(gameStateReducer, {
     ...initialGameState,
     answer,
     rows,

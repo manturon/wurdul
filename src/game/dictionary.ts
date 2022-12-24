@@ -27,10 +27,10 @@ export class Dictionary {
       .then(entries => new Map(entries));
     this.answers = Promise.all([this.rawTranscriptionsMap, answers]).then(
       ([dict, rawAnswers]) => {
-        let answers: Map<string, RawTranscription[]> = new Map(rawAnswers);
+        const answers = new Map<string, RawTranscription[]>(rawAnswers);
         // Overwrite the entries in common from dict with the ones in answers
         // Hopefully temporary...
-        for (let [key, value] of answers) {
+        for (const [key, value] of answers) {
           dict.set(key, value);
         }
         return rawAnswers;
@@ -47,9 +47,9 @@ export class Dictionary {
     index: number,
     subindex: number
   ): Promise<[string, RawTranscription] | undefined> {
-    let answers = await this.answers;
-    let [word, wordSounds] = answers.at(index % answers.length) ?? [];
-    let wordSound = wordSounds?.at(subindex % wordSounds.length);
+    const answers = await this.answers;
+    const [word, wordSounds] = answers.at(index % answers.length) ?? [];
+    const wordSound = wordSounds?.at(subindex % wordSounds.length);
     return word && wordSound ? [word, wordSound] : undefined;
   }
 
@@ -57,7 +57,7 @@ export class Dictionary {
     if (this.cache.has(english)) {
       return this.cache.get(english);
     } else {
-      let sounds =
+      const sounds =
         (await this.rawTranscriptionsMap)
           .get(english)
           ?.map(this.rawTranscriptionToWordSound) ?? [];
@@ -67,15 +67,15 @@ export class Dictionary {
   }
 
   public async filterByLength(length: number) {
-    let pool = new Map();
-    for (let [word, rawTranscriptions] of (
+    const pool = new Map();
+    for (const [word, rawTranscriptions] of (
       await this.rawTranscriptionsMap
     ).entries()) {
-      let wordSounds = rawTranscriptions
+      const wordSounds = rawTranscriptions
         .map(this.rawTranscriptionToWordSound)
         .filter(ws => ws.length === length);
       if (wordSounds.length) {
-        for (let wordSound of wordSounds) {
+        for (const wordSound of wordSounds) {
           pool.set(word, [...(pool.get(word) || []), wordSound]);
         }
       }

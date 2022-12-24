@@ -7,14 +7,20 @@ import {
 } from "../game/game";
 import { Wurdul } from "./Wurdul";
 
+declare global {
+  interface Window {
+    setAnswer(word: string): void;
+  }
+}
+
 export const WEBSITE = 'http://manturon.github.io/wurdul';
 
 export const App = () => {
-  let rows = DEFAULT_ROWS;
-  let [answer, setAnswer] = useState<Answer | null>(null);
+  const rows = DEFAULT_ROWS;
+  const [answer, setAnswer] = useState<Answer | null>(null);
 
   useEffect(() => {
-    let now = new Date();
+    const now = new Date();
     getAnswerForDate(now).then(answer => {
       setAnswer(answer);
       if (process.env.NODE_ENV !== 'production') {
@@ -29,7 +35,7 @@ export const App = () => {
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
-      window["setAnswer"] = (word: string) => {
+      window.setAnswer = (word: string) => {
         getAnswerForWord(word).then(answer =>
           answer ? setAnswer(answer) : void 0
         );

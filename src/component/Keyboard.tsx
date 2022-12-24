@@ -27,8 +27,8 @@ const soundChoicesForEnglish = async (english: string, lengthBias: number) => {
   if (sounds.length) {
     if (sounds.length > 1) {
       // Put the most likely solution on top
-      let sorted = new Array<WordSound>();
-      for (let sound of sounds) {
+      const sorted = new Array<WordSound>();
+      for (const sound of sounds) {
         if (sound.length === lengthBias) {
           sorted.unshift(sound);
         } else {
@@ -58,28 +58,24 @@ const makeChoiceBlocks = (
     />
   ));
 
-const makeMatchStateTable = matchState => {
-  // TODO
-};
-
 /**
  * Handle user input, present choices and show current match state for sounds.
  */
 export const Keyboard = () => {
-  let [{ answer, history }, gameActionDispatcher] = useContext(GameContext);
+  const [{ answer, history }, gameActionDispatcher] = useContext(GameContext);
 
-  let matchMap = getSoundMatchStatus(history);
+  const matchMap = getSoundMatchStatus(history);
 
-  let inputElement = useRef<HTMLInputElement>(null);
+  const inputElement = useRef<HTMLInputElement>(null);
 
   // The current English word to get sounds from, if in english input mode
-  let [english, setEnglish] = useState("");
+  const [english, setEnglish] = useState("");
   // The currently selected sound choice, in case there's more than one for a word
-  let [currentSoundChoice, setCurrentSoundChoice] = useState(0);
+  const [currentSoundChoice, setCurrentSoundChoice] = useState(0);
 
-  let soundChoices = soundChoicesForEnglish(english, answer!.sound.length);
-  let [choices, setChoices] = useState<WordSound[]>([]);
-  let [choiceListRows, setChoiceListRows] = useState<JSX.Element[][]>();
+  const soundChoices = soundChoicesForEnglish(english, answer!.sound.length);
+  const [choices, setChoices] = useState<WordSound[]>([]);
+  const [choiceListRows, setChoiceListRows] = useState<JSX.Element[][]>();
 
   useEffect(() => {
     soundChoices.then(choices => [setChoices(choices)]);
@@ -117,7 +113,7 @@ export const Keyboard = () => {
   }, [currentSoundChoice, english]);
 
   useEffect(() => {
-    let listener = () => {
+    const listener = () => {
       // Focus on the input element in case it's not in focus
       if (
         inputElement.current &&
@@ -131,17 +127,17 @@ export const Keyboard = () => {
   }, []);
 
   // Handle the text field changing
-  let handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
+  const handleOnChange: React.ChangeEventHandler<HTMLInputElement> = ({
     target,
   }) => {
     // Only allow alphabetic, dash and apostrophe characters
-    let value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
+    const value = target.value?.toLowerCase().replace(/[^'a-z-]/g, "");
     setEnglish(value);
     setCurrentSoundChoice(0);
   };
 
   // Handle a key press in the page
-  let handleKeyDown: React.KeyboardEventHandler = event => {
+  const handleKeyDown: React.KeyboardEventHandler = event => {
     if (!choices || !choices.length) {
       return;
     }
@@ -166,7 +162,7 @@ export const Keyboard = () => {
     }
   };
 
-  let commit = () => {
+  const commit = () => {
     if (!choices) {
       return;
     }
@@ -175,7 +171,7 @@ export const Keyboard = () => {
   };
 
   // Handle clicking on the choice list
-  let handleOnClick = (soundChoice: number) => {
+  const handleOnClick = (soundChoice: number) => {
     setCurrentSoundChoice(soundChoice);
   };
 

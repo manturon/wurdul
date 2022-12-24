@@ -2,12 +2,12 @@ import React, { useContext } from "react";
 import { WEBSITE } from "./App";
 import Block, { BlockSize, BlockType } from "./Block";
 import { makeBlockInfo } from "./Board";
-import { Answer, getWurdulDayForDate, GuessHistory, Match } from "../game/game";
+import { Answer, GuessHistory, Match } from "../game/game";
 import Sound from "../game/sound";
 import { GameContext } from "./Wurdul";
 
 export const makeRow = (sounds: Sound[]) => {
-  let size =
+  const size =
     sounds.length > 5
       ? BlockSize.SMALL
       : sounds.length < 4
@@ -27,7 +27,7 @@ export const makeRow = (sounds: Sound[]) => {
 };
 
 const historyToEmoji = function (answer: Answer, history: GuessHistory) {
-  let emojis = history.map(row =>
+  const emojis = history.map(row =>
     row
       .map(([_sound, match]) =>
         match === Match.MATCH ? "🟩" : match === Match.SOME_MATCH ? "🟨" : "⬛️"
@@ -47,17 +47,17 @@ const historyToEmoji = function (answer: Answer, history: GuessHistory) {
 };
 
 export const TheAnswer = function () {
-  let state = useContext(GameContext)?.[0];
+  const state = useContext(GameContext)[0];
   if (!state) {
     return <div></div>;
   }
-  let { history, answer, won } = state;
+  const { history, answer, won } = state;
 
   const handleOnClick: React.MouseEventHandler = function (event) {
     navigator.clipboard.writeText(historyToEmoji(answer, history));
   };
 
-  let common = "w-full py-2 text-white text-center";
+  const common = "w-full py-2 text-white text-center";
   return (
     <div className="w-72 mx-auto flex flex-col gap-1">
       {won ? (

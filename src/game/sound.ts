@@ -20,16 +20,28 @@ export class Sound {
   public static SOUND_MAP = new Map<SoundKey, Sound>(
     Object.entries(KEYS).map(([soundKey, sound]) => [
       soundKey,
-      Object.assign(new Sound(), sound),
-    ]) as any
+      new Sound(
+        sound.name as SoundKey,
+        sound.type as SoundType[],
+        sound.ipas,
+        sound.asin
+      ),
+    ]) as unknown as [SoundKey, Sound][]
   );
+
+  constructor(
+    public readonly name: SoundKey,
+    public readonly type: SoundType[],
+    private readonly ipas: string[],
+    public readonly asin: string[]
+  ) {}
 
   public static get all() {
     return Sound.SOUND_MAP.values();
   }
 
   public static from(key: SoundKey) {
-    return Sound.SOUND_MAP.get(key) || null;
+    return Sound.SOUND_MAP.get(key) ?? null;
   }
 
   public is(other: Sound) {
@@ -39,11 +51,6 @@ export class Sound {
   public get ipa() {
     return this.ipas[0];
   }
-
-  public readonly name: SoundKey;
-  public readonly type: SoundType[];
-  private readonly ipas: string[];
-  public readonly asin: string[];
 }
 
 export default Sound;
