@@ -45,9 +45,7 @@ export const App = () => {
 
   if (answer) {
     return (
-      <React.StrictMode>
-        <Wurdul answer={answer} rows={rows} />
-      </React.StrictMode>
+      <Wurdul answer={answer} rows={rows} />
     );
   } else {
     return <div className="w-72 mx-auto text-right">Loading dictionary...</div>;
