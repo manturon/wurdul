@@ -1,4 +1,4 @@
-import KEYS from "./keys.json";
+import KEYS from "../static/keys.json";
 
 export type SoundType =
   | "vowel"

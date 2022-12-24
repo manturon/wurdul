@@ -1,5 +1,5 @@
 import React, { ReactNode, useContext } from "react";
-import { GameEvent, Match } from "./game";
+import { GameEvent, Match } from "../game/game";
 import { GameContext } from "./Wurdul";
 
 export enum BlockSize {

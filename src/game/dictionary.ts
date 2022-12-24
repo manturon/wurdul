@@ -1,9 +1,9 @@
 import Sound, { SoundKey, WordSound } from "./sound";
 
-const DICT = import("./dict.json") as object as Promise<
+const DICT = import("../static/dict.json") as object as Promise<
   Record<string, string[]>
 >;
-const ANSWERS = import("./answers.json") as object as Promise<
+const ANSWERS = import("../static/answers.json") as object as Promise<
   [string, string[]][]
 >;
 

@@ -5,9 +5,9 @@ import {
   GameEvent,
   getSoundMatchStatus,
   SoundMatchStatus,
-} from "./game";
-import { WordSound } from "./sound";
-import { keyGoesDown, keyGoesUp } from "./util";
+} from "../game/game";
+import { WordSound } from "../game/sound";
+import { keyGoesDown, keyGoesUp } from "../util";
 import { GameContext } from "./Wurdul";
 
 const MATCH_TABLE_LAYOUT = [

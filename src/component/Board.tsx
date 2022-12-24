@@ -1,8 +1,8 @@
 import React, { Fragment, useContext } from "react";
 import Block, { BlockSize, BlockType } from "./Block";
-import { GuessResult } from "./game";
-import { WordSound } from "./sound";
-import { rangeMap } from "./util";
+import { GuessResult } from "../game/game";
+import { WordSound } from "../game/sound";
+import { rangeMap } from "../util";
 import { GameContext } from "./Wurdul";
 
 export const makeBlockInfo = (asin: string[]) => (

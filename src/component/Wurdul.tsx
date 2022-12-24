@@ -7,7 +7,7 @@ import {
   GameState,
   gameStateReducer,
   initialGameState,
-} from "./game";
+} from "../game/game";
 import { Keyboard } from "./Keyboard";
 import TheAnswer from "./TheAnswer";
 

@@ -4,7 +4,7 @@ import {
   DEFAULT_ROWS,
   getAnswerForDate,
   getAnswerForWord,
-} from "./game";
+} from "../game/game";
 import { Wurdul } from "./Wurdul";
 
 export const WEBSITE = 'http://manturon.github.io/wurdul';

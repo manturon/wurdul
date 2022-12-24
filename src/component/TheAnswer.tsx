@@ -2,8 +2,8 @@ import React, { useContext } from "react";
 import { WEBSITE } from "./App";
 import Block, { BlockSize, BlockType } from "./Block";
 import { makeBlockInfo } from "./Board";
-import { Answer, getWurdulDayForDate, GuessHistory, Match } from "./game";
-import Sound from "./sound";
+import { Answer, getWurdulDayForDate, GuessHistory, Match } from "../game/game";
+import Sound from "../game/sound";
 import { GameContext } from "./Wurdul";
 
 export const makeRow = (sounds: Sound[]) => {
