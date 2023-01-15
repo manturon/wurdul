@@ -4,7 +4,7 @@ import Block, { BlockSize, BlockType } from "./Block";
 import { makeBlockInfo } from "./Board";
 import { Answer, GuessHistory, Match } from "../game/game";
 import Sound from "../game/sound";
-import { GameContext } from "./Wurdul";
+import { GameContext } from "./Game";
 
 export const makeRow = (sounds: Sound[]) => {
   const size =

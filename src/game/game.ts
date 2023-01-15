@@ -1,205 +1,95 @@
-import { ReactNode } from "react";
-import { englishDictionary } from "./dictionary";
-import Sound, { SoundKey, WordSound } from "./sound";
+import { choose } from "../util";
+import { Dictionary } from "./dictionary";
+import { Match } from "./matching";
+import { getTranscript, RawTranscript, Transcript, Word } from "./transcript";
 
-export const DICTIONARY = englishDictionary;
+/**
+ * All the row matches in order of commit.
+ */
+export type MatchHistory = [match: Match, text: string][];
 
-export const DEFAULT_ROWS = 6;
+type RawAnswer = [word: string, rawTranscripts: RawTranscript[]];
 
-export type GuessMatch = [Sound, Match];
-export type GuessResult = GuessMatch[];
-export type GuessHistory = GuessResult[];
-export type SoundMatchStatus = Map<Sound, Match>;
+export enum AnswerType {
+  DAILY,
+  RANDOM,
+  CUSTOM,
+}
+
+/**
+ * The target transcription and the word where it comes from.
+ */
 export interface Answer {
-  sound: WordSound;
-  word: string;
-  day?: number;
+  readonly transcript: Transcript;
+  readonly word: Word[];
+  readonly type: AnswerType;
+  readonly index?: number;
 }
 
-export enum Match {
-  UNKNOWN = "unknown",
-  NO_MATCH = "no",
-  SOME_MATCH = "some",
-  MATCH = "match",
+export enum InvalidInputReason {
+  EMPTY,
+  TOO_SHORT,
+  TOO_LONG,
+  GAME_OVER,
+  NOT_IN_WORD_LIST,
 }
 
-export enum GameEvent {
-  INFO = "info",
-  COMMIT = "commit",
-  INPUT = "input",
-  RESET = "reset",
-}
-
-export type GameAction =
-  | { type: GameEvent.COMMIT }
-  | { type: GameEvent.RESET; config: GameConfig }
-  | { type: GameEvent.INFO; message: ReactNode }
-  | {
-      type: GameEvent.INPUT;
-      input: WordSound;
-    };
-
-export interface GameState {
-  answer: Answer;
-  input: WordSound;
-  history: GuessHistory;
-  rows: number;
-  gameOver: boolean;
-  won: boolean;
-  info?: ReactNode;
-}
-
-export const gameStateReducer: React.Reducer<GameState, GameAction> = (
-  state,
-  action
-) => {
-  const { input, answer, history, rows } = state;
-  switch (action.type) {
-    case GameEvent.INFO:
-      return { ...state, info: action.message };
-    case GameEvent.RESET:
-      console.log("Reset!");
-      return { ...initialGameState, ...action.config };
-    case GameEvent.INPUT:
-      return { ...state, input: action.input };
-    case GameEvent.COMMIT: {
-      if (state.gameOver) {
-        return {
-          ...state,
-          input: [],
-        };
+async function getAnswers(dictionary: Dictionary): Promise<RawAnswer[]> {
+  const seq = dictionary.version.seq;
+  const cacheName = `${Dictionary.CACHE_NAME}-${seq}-answers`;
+  if (await window.caches.has(cacheName)) {
+    const answers = await (await window.caches.open(cacheName))
+      .match("./answers.json")
+      .then((res) => res?.json());
+    if (answers) {
+      if (!("entries" in answers)) {
+        throw new Error("Could not get fresh answer pool");
       }
-      const guess = input;
-      if (guess.length === answer.sound.length) {
-        const matchResult = matchGuess(answer!, guess);
-        const newHistory = [...history, matchResult];
-
-        let gameOver = false;
-        let won = false;
-        if (isAllMatch(matchResult)) {
-          won = true;
-          gameOver = true;
-        } else {
-          gameOver = newHistory.length === rows;
-        }
-
-        return {
-          ...state,
-          won,
-          input: [],
-          history: newHistory,
-          gameOver,
-        };
-      }
-      return state;
+      console.debug("Loading answer pool from cache");
+      return answers.entries;
     }
-    default:
-      throw new Error("Unknown action dispatched: " + action);
   }
-};
+  console.debug("Answer pool not found in cache, loading fresh");
+  const answers = await fetch("./answers.json").then((res) => res.json());
+  if (!answers || !("entries" in answers)) {
+    throw new Error("Could not get fresh answer pool");
+  }
+  return answers.entries;
+}
 
-export const initialGameState: Omit<GameState, "answer"> = {
-  rows: DEFAULT_ROWS,
-  input: [],
-  history: [],
-  gameOver: false,
-  won: false,
-};
+export async function randomAnswer(dictionary: Dictionary): Promise<Answer> {
+  const answers = await getAnswers(dictionary);
+  const [word, rawTranscripts] = choose(answers)!;
+  return {
+    index: undefined,
+    transcript: getTranscript(choose(rawTranscripts)!),
+    type: AnswerType.RANDOM,
+    word: [word], // TODO: Add all words that match this sound
+  };
+}
 
-export const WURDUL_EPOCH = new Date(2022, 10, 12);
+export const WURDUL_EPOCH = new Date(2022, 10, 12).getTime();
 
-export const getWurdulDayForDate = (date: Date) =>
-  Math.floor((date.getTime() - WURDUL_EPOCH.getTime()) / 1000 / 60 / 60 / 24);
+export const getWurdulDayForDate = (date: number) =>
+  Math.floor((date - WURDUL_EPOCH) / 1000 / 60 / 60 / 24);
 
-export const getAnswerForDate = async (date: Date): Promise<Answer> => {
+export async function answerForDate(
+  dictionary: Dictionary,
+  date: number,
+): Promise<Answer> {
+  const answers = await getAnswers(dictionary);
   // Get number of days since the Wurdul Epoch
   const index = getWurdulDayForDate(date);
   const subindex = index;
-  const answer = await DICTIONARY.getAnswer(index, subindex);
-  if (!answer) {
+  const rawAnswer = answers.at(index % answers.length);
+  if (!rawAnswer) {
     throw new Error("Could not get answer for date: " + date);
   }
-  const [word, rawTranscription] = answer;
+  const transcript = rawAnswer[1].at(subindex % rawAnswer[1].length)!;
   return {
-    sound: DICTIONARY.rawTranscriptionToWordSound(rawTranscription),
-    word,
-    day: index,
+    index: index,
+    type: AnswerType.DAILY,
+    transcript: getTranscript(transcript),
+    word: [rawAnswer[0]], // TODO: Add all words that match this sound
   };
-};
-
-export const getAnswerForWord = async (
-  word: string
-): Promise<Answer | null> => {
-  const wordSound = await DICTIONARY.wordSounds(word);
-  if (wordSound.length) {
-    return { sound: wordSound[0], word };
-  } else {
-    return null;
-  }
-};
-
-export const matchGuess = (answer: Answer, guess: WordSound): GuessResult => {
-  const { sound } = answer;
-  const soundCount = sound.reduce<Record<SoundKey, number>>(
-    (previous, current) => ({
-      ...previous,
-      [current.name]: (previous[current.name] ?? 0) + 1,
-    }),
-    {}
-  );
-  return guess
-    .map((guessedSound, index): GuessMatch => {
-      if (sound.length < index) {
-        return [guessedSound, Match.NO_MATCH];
-      }
-      const expectedSound = sound[index];
-      if (guessedSound.is(expectedSound)) {
-        soundCount[guessedSound.name] -= 1;
-        return [guessedSound, Match.MATCH];
-      } else {
-        return [guessedSound, Match.NO_MATCH];
-      }
-    })
-    .map(([guessedSound, match]): GuessMatch => {
-      if (match === Match.MATCH) {
-        return [guessedSound, match];
-      } else if (soundCount[guessedSound.name]) {
-        soundCount[guessedSound.name] -= 1;
-        return [guessedSound, Match.SOME_MATCH];
-      } else {
-        return [guessedSound, Match.NO_MATCH];
-      }
-    });
-};
-
-export const isAllMatch = function (matchMap: GuessResult) {
-  return matchMap.every(match => match[1] === Match.MATCH);
-};
-
-const ALL_UNKNOWN_MATCH = new Map(
-  Array.from(Sound.all, sound => [sound, Match.UNKNOWN])
-);
-
-export const getSoundMatchStatus = (
-  history: GuessHistory
-): SoundMatchStatus => {
-  if (!history.length) {
-    return ALL_UNKNOWN_MATCH;
-  }
-  const matchMap = new Map(ALL_UNKNOWN_MATCH);
-  for (const entry of history) {
-    for (const [sound, match] of entry) {
-      const currentMatch = matchMap.get(sound);
-      if (currentMatch === Match.MATCH || currentMatch === Match.NO_MATCH) {
-        continue;
-      }
-      matchMap.set(sound, match);
-    }
-  }
-  return matchMap;
-};
-
-export interface GameConfig {
-  answer: Answer;
-  rows: number;
 }

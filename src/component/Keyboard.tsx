@@ -8,7 +8,7 @@ import {
 } from "../game/game";
 import { WordSound } from "../game/sound";
 import { keyGoesDown, keyGoesUp } from "../util";
-import { GameContext } from "./Wurdul";
+import { GameContext } from "./Game";
 
 const MATCH_TABLE_LAYOUT = [
   ["l", "r", "m", "n", "ng", "w", "y"],

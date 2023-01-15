@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-  Answer,
-  DEFAULT_ROWS,
-  getAnswerForDate,
-  getAnswerForWord,
-} from "../game/game";
-import { Wurdul } from "./Wurdul";
+import Game from "./Game";
+import "../style.css";
+import { Dictionary } from "../game/dictionary";
 
 declare global {
   interface Window {
@@ -13,41 +9,29 @@ declare global {
   }
 }
 
-export const WEBSITE = 'http://manturon.github.io/wurdul';
+const MAX_TRIES = 6;
 
-export const App = () => {
-  const rows = DEFAULT_ROWS;
-  const [answer, setAnswer] = useState<Answer | null>(null);
+export const DictionaryContext = React.createContext<Dictionary>(null!);
 
+export default function App() {
+  const [dictionary, setDictionary] = useState<Dictionary | null>(null);
   useEffect(() => {
-    const now = new Date();
-    getAnswerForDate(now).then(answer => {
-      setAnswer(answer);
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(
-          `Answer: ${answer.sound.map(sound => sound.name).join("-")} (${
-            answer.word
-          })`
-        );
-      }
+    Dictionary.attemptFromCache().then((dictionary) => {
+      setDictionary(dictionary);
+      window['dictionary'] = dictionary;
     });
   }, []);
 
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      window.setAnswer = (word: string) => {
-        getAnswerForWord(word).then(answer =>
-          answer ? setAnswer(answer) : void 0
-        );
-      };
-    }
-  }, []);
-
-  if (answer) {
-    return (
-      <Wurdul answer={answer} rows={rows} />
-    );
-  } else {
-    return <div className="w-72 mx-auto text-right">Loading dictionary...</div>;
+  if (!dictionary) {
+    return "Loading...";
   }
-};
+
+  return (
+    <DictionaryContext.Provider value={dictionary}>
+      <div>
+        <h1>Wurdul</h1>
+        <Game maxTries={MAX_TRIES} />
+      </div>
+    </DictionaryContext.Provider>
+  );
+}
