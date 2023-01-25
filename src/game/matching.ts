@@ -75,7 +75,7 @@ export class Matcher {
   }
 
   public get bestMatches() {
-    return [];
+    return new Set;
   }
 
   public bestForPhoneme(phoneme: Phoneme): Match {
