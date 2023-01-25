@@ -80,3 +80,36 @@ export function translate(string: string, ...args: any[]) {
     string,
   );
 }
+
+/**
+ * Count the number of times a value appears in `iterable`.
+ * @returns A `Map` where the keys are values in `iterable`,
+ *  and the values are the number of times each appears in it.
+ */
+export function count<T>(iterable: Iterable<T>): Map<T, number> {
+  const map = new Map<T, number>();
+  for (const value of iterable) {
+    map.set(value, (map.get(value) ?? 0) + 1);
+  }
+  return map;
+}
+
+/**
+ * Gather the indices where a value appears in `iterable`.
+ * @returns A `Map` where the keys are values in `iterable`,
+ *  and the values are a `Set` with the indices where the value appears in it.
+ */
+export function countWithIndex<T>(iterable: Iterable<T>): Map<T, Set<number>> {
+  const map = new Map<T, Set<number>>();
+  let i = 0;
+  for (const value of iterable) {
+    let set = map.get(value);
+    if (!set) {
+      set = new Set();
+      map.set(value, set);
+    }
+    set.add(i);
+    i += 1;
+  }
+  return map;
+}

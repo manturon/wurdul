@@ -1,10 +1,11 @@
+import { count, countWithIndex } from "../util";
 import Phoneme from "./phonemes";
 import { Transcript } from "./transcript";
 
 /**
  * A type of match of a single guess to an answer.
  */
-export enum MatchType {
+export enum Match {
   /**
    * The guessed phoneme is in the answer and at that position.
    */
@@ -21,75 +22,78 @@ export enum MatchType {
   UNKNOWN = "unknown",
 }
 
-/**
- * The outcome of matching a single guessed phoneme to the phoneme at that
- * position.
- */
-export interface SingleMatch {
-  readonly phoneme: Phoneme;
-  readonly type: MatchType;
-}
+export class Matcher {
+  // Phoneme and the number of times it is in the transcript
+  private _phonemeCount: Map<Phoneme, Set<number>>;
+  private _matches: Match[][];
 
-/**
- * The outcome of matches from a whole row.
- */
-export type Match = readonly SingleMatch[];
-
-export class Matches {
-  public static isAllMatch(match: Match) {
-    return match.every((match) => match.type === MatchType.MATCH);
+  constructor(
+    public readonly expected: Transcript,
+    public readonly guesses: Transcript[],
+  ) {
+    this._phonemeCount = countWithIndex(expected);
+    this._matches = guesses.map((guess) => this.matchRowWithKnowledge(guess));
   }
 
-  #phonemeInfo = new Map<Phoneme, { count: number; matchPos: Set<number> }>();
-
-  public readonly expected: Transcript;
-
-  public constructor(expected: Transcript) {
-    this.expected = expected;
-
-    for (const [index, phoneme] of expected.entries()) {
-      const info = this.#phonemeInfo.get(phoneme) ?? {
-        count: 0,
-        matchPos: new Set(),
-      };
-      info.count += 1;
-      info.matchPos.add(index);
-      this.#phonemeInfo.set(phoneme, info);
-    }
-  }
-
-  public match(guess: Transcript): SingleMatch[] {
+  private matchRowWithKnowledge(guess: Transcript): Match[] {
     const length = this.expected.length;
     if (guess.length > length) {
       guess = guess.slice(0, length);
     }
 
-    const matches: SingleMatch[] = [];
-    const phonemeCount = new Map(
-      Array.from(this.#phonemeInfo, ([phoneme, { count: amount }]) => [
-        phoneme,
-        amount,
-      ]),
-    );
+    const matchRow: Match[] = new Array(length).fill(Match.NO_MATCH);
+    const guessPhonemeCount = new Map(guess.map((guess) => [guess, 0]));
 
-    for (const [index, phoneme] of guess.entries()) {
-      const info = this.#phonemeInfo.get(phoneme);
-      if (info) {
-        const count = phonemeCount.get(phoneme);
-        if (info.matchPos.has(index)) {
-          matches.push({ phoneme, type: MatchType.MATCH });
-          phonemeCount.set(phoneme, count! - 1);
-        } else if (count) {
-          matches.push({ phoneme, type: MatchType.SOME_MATCH });
-          phonemeCount.set(phoneme, count - 1);
-        } else {
-          matches.push({ phoneme, type: MatchType.NO_MATCH });
-        }
-      } else {
-        matches.push({ phoneme, type: MatchType.NO_MATCH });
+    for (let i = 0; i < guess.length; ++i) {
+      const guessed = guess[i];
+      const expected = this.expected[i];
+      if (guessed == expected) {
+        matchRow[i] = Match.MATCH;
+        guessPhonemeCount.set(guessed, guessPhonemeCount.get(guessed)! + 1);
+      }
+    }
+    for (let i = 0; i < guess.length; ++i) {
+      const guessed = guess[i];
+      const expected = this.expected[i];
+      const expectedCount = this._phonemeCount.get(guessed)?.size ?? 0;
+      const guessedCount = guessPhonemeCount.get(guessed)!;
+      if (
+        guessed != expected &&
+        expectedCount != 0 &&
+        expectedCount > guessedCount
+      ) {
+        matchRow[i] = Match.SOME_MATCH;
+        guessPhonemeCount.set(guessed, guessedCount + 1);
       }
     }
 
-    return matches;
+    return matchRow;
+  }
+
+  public get allMatches() {
+    return this._matches;
+  }
+
+  public get bestMatches() {
+    return [];
+  }
+
+  public bestForPhoneme(phoneme: Phoneme): Match {
+    let best = Match.UNKNOWN;
+    for (const [i, row] of this._matches.entries()) {
+      for (const [j, match] of row.entries()) {
+        if (this.guesses[i][j] !== phoneme) {
+          continue;
+        }
+        if (match === Match.MATCH) {
+          return Match.MATCH;
+        } else if (match === Match.SOME_MATCH) {
+          best = Match.SOME_MATCH;
+        } else if (best !== Match.SOME_MATCH) {
+          best = Match.NO_MATCH;
+        }
+      }
+    }
+    return best;
   }
 }

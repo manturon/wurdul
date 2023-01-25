@@ -8,8 +8,6 @@ import { getTranscript, RawTranscript, Transcript, Word } from "./transcript";
  */
 export type MatchHistory = [match: Match, text: string][];
 
-type RawAnswer = [word: string, rawTranscripts: RawTranscript[]];
-
 export enum AnswerType {
   DAILY,
   RANDOM,
@@ -21,7 +19,7 @@ export enum AnswerType {
  */
 export interface Answer {
   readonly transcript: Transcript;
-  readonly word: Word[];
+  readonly words: Word[];
   readonly type: AnswerType;
   readonly index?: number;
 }
@@ -34,37 +32,14 @@ export enum InvalidInputReason {
   NOT_IN_WORD_LIST,
 }
 
-async function getAnswers(dictionary: Dictionary): Promise<RawAnswer[]> {
-  const seq = dictionary.version.seq;
-  const cacheName = `${Dictionary.CACHE_NAME}-${seq}-answers`;
-  if (await window.caches.has(cacheName)) {
-    const answers = await (await window.caches.open(cacheName))
-      .match("./answers.json")
-      .then((res) => res?.json());
-    if (answers) {
-      if (!("entries" in answers)) {
-        throw new Error("Could not get fresh answer pool");
-      }
-      console.debug("Loading answer pool from cache");
-      return answers.entries;
-    }
-  }
-  console.debug("Answer pool not found in cache, loading fresh");
-  const answers = await fetch("./answers.json").then((res) => res.json());
-  if (!answers || !("entries" in answers)) {
-    throw new Error("Could not get fresh answer pool");
-  }
-  return answers.entries;
-}
-
-export async function randomAnswer(dictionary: Dictionary): Promise<Answer> {
-  const answers = await getAnswers(dictionary);
-  const [word, rawTranscripts] = choose(answers)!;
+export function randomAnswer(dictionary: Dictionary): Answer {
+  const n = (Math.random() * dictionary.answers.length) | 0;
+  const [transcript, words] = dictionary.answerByNumber(n);
   return {
     index: undefined,
-    transcript: getTranscript(choose(rawTranscripts)!),
+    transcript,
     type: AnswerType.RANDOM,
-    word: [word], // TODO: Add all words that match this sound
+    words,
   };
 }
 
@@ -77,19 +52,12 @@ export async function answerForDate(
   dictionary: Dictionary,
   date: number,
 ): Promise<Answer> {
-  const answers = await getAnswers(dictionary);
-  // Get number of days since the Wurdul Epoch
-  const index = getWurdulDayForDate(date);
-  const subindex = index;
-  const rawAnswer = answers.at(index % answers.length);
-  if (!rawAnswer) {
-    throw new Error("Could not get answer for date: " + date);
-  }
-  const transcript = rawAnswer[1].at(subindex % rawAnswer[1].length)!;
+  const n = getWurdulDayForDate(date);
+  const [transcript, words] = dictionary.answerByNumber(n);
   return {
-    index: index,
+    index: undefined,
+    transcript,
     type: AnswerType.DAILY,
-    transcript: getTranscript(transcript),
-    word: [rawAnswer[0]], // TODO: Add all words that match this sound
+    words,
   };
 }

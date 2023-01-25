@@ -1,49 +1,69 @@
 import React, { useContext, useState } from "react";
-import { Answer, AnswerType } from "../game/game";
-import { MatchType } from "../game/matching";
-import Phoneme, {
-  getPhonemeDescriptor,
-  PHONEME_DEFINITIONS,
-} from "../game/phonemes";
+import { Answer } from "../game/game";
+import { Matcher } from "../game/matching";
+import Phoneme, { getPhonemeDescriptor } from "../game/phonemes";
 import { Transcript } from "../game/transcript";
-import { choose, extendArray, repeat, repeatWithProvider } from "../util";
+import { repeatWithProvider } from "../util";
 import { DictionaryContext } from "./App";
 import Block from "./Block";
-import Board from "./Board";
-import Input from "./Input";
-import Summary from "./Summary";
 
 interface Props {
   maxTries: number;
+  answer: Answer;
 }
 
-type Input = Transcript;
-type History = Transcript[];
+interface HistoryEntry {
+  transcript: Transcript;
+  word: string;
+}
+type History = HistoryEntry[];
 
-export default function Game({ maxTries }: Props) {
-  const answer: Answer = {
-    type: AnswerType.CUSTOM,
-    transcript: [Phoneme.B, Phoneme.ERR, Phoneme.I, Phoneme.NG, Phoneme.Z],
-    word: ["bearings"],
-  };
-
+export default function Game({ maxTries, answer }: Props) {
+  const colCount = answer.transcript.length;
   const dictionary = useContext(DictionaryContext);
 
   const [history, setHistory] = useState<History>([]);
-  const [input, setInput] = useState<Input>([]);
+  const [wordInput, setWordInput] = useState<string>("");
+  const transcriptsForInput = dictionary.wordTranscripts(wordInput.trim());
+
+  const phonemeInput = transcriptsForInput[0] ?? []; // todo: chooser
+
+  const matcher = new Matcher(
+    answer.transcript,
+    history.map((entry) => entry.transcript),
+  );
 
   const handleOnInput: React.FormEventHandler<HTMLInputElement> = ({
     currentTarget,
   }) => {
     let value = currentTarget.value;
-    value = value.trim();
-    const transcript = dictionary.dict.get(value);
-    if (transcript?.length) {
-      const phonemes = transcript.at(0)!.split(" ") as Phoneme[];
-      setInput(phonemes);
-    } else {
-      setInput([]);
+    setWordInput(value);
+  };
+
+  const clearInput = () => {
+    setWordInput("");
+  };
+
+  const handleOnClick: React.MouseEventHandler<HTMLButtonElement> = () => {
+    commitInput();
+  };
+
+  const handleOnKeyUp: React.KeyboardEventHandler = ({ key }) => {
+    if (key === "Enter") {
+      commitInput();
     }
+  };
+
+  const commitInput = () => {
+    if (!phonemeInput?.length || phonemeInput.length != colCount) {
+      // todo: check if input is valid & so on
+      return;
+    }
+    setHistory((history) => [
+      ...history,
+      { transcript: phonemeInput, word: wordInput },
+    ]);
+    clearInput();
   };
 
   type LayoutRow = Phoneme[];
@@ -108,43 +128,77 @@ export default function Game({ maxTries }: Props) {
   const makeSummaryBoard = (layout: Layout) =>
     layout.map((row, index) => (
       <div className="summary-row" key={index}>
-        {row.map(getPhonemeDescriptor).map((pd, index) => (
-          <Block key={index}>{pd.key}</Block>
-        ))}
+        {row.map(getPhonemeDescriptor).map((pd, index) => {
+          const match = matcher.bestForPhoneme(pd.key as Phoneme);
+          return (
+            <Block key={index} match={match}>
+              {pd.key}
+            </Block>
+          );
+        })}
       </div>
     ));
 
   const makeBoard = () => {
-    const cols = answer.transcript.length;
-    let index = 0;
-    const inputRow = input
-      .slice(0, cols)
+    let i = 0;
+    const matches = matcher.allMatches;
+    const historyBlocks = history.flatMap((entry, j) => {
+      const rowMatches = matches[j];
+      const transcript = entry.transcript;
+      return transcript.map((phoneme, k) => {
+        const pd = getPhonemeDescriptor(phoneme);
+        return (
+          <Block key={i++} match={rowMatches[k]}>
+            {pd.key}
+          </Block>
+        );
+      });
+    });
+    const inputBlocks = phonemeInput
+      .slice(0, colCount)
       .map((phoneme) => {
         const pd = getPhonemeDescriptor(phoneme);
         return (
-          <Block input={true} key={index++}>
+          <Block input={true} key={i++}>
             {pd.key}
           </Block>
         );
       })
       .concat(
-        repeatWithProvider(Math.max(0, cols - input.length), () => (
-          <Block input={true} key={index++}></Block>
+        // appends the empty elements at the end of an unfinished input
+        repeatWithProvider(Math.max(0, colCount - phonemeInput.length), () => (
+          <Block input={true} key={i++}></Block>
         )),
       );
-    const emptyRow = repeatWithProvider(cols * (maxTries - 1), () => (
-      <Block key={index++}></Block>
-    ));
-    return inputRow.concat(emptyRow);
+    const emptyBlocks = repeatWithProvider(
+      colCount * (maxTries - (inputBlocks.length ? 1 : 0) - history.length),
+      () => <Block key={i++}></Block>,
+    );
+    return [...historyBlocks, ...inputBlocks, ...emptyBlocks];
   };
 
   return (
     <div className="game">
-      <div className="game-board">{makeBoard()}</div>
+      <div
+        className="game-board"
+        style={
+          { "--rows": maxTries, "--cols": colCount } as React.CSSProperties
+        }>
+        {makeBoard()}
+      </div>
       <div className="game-input">
-        <input className="word-input" type="text" onInput={handleOnInput} />
+        <input
+          className="word-input"
+          type="text"
+          onInput={handleOnInput}
+          onKeyUp={handleOnKeyUp}
+          value={wordInput}
+        />
         <div className="word-preview"></div>
-        <button className="submit-guess-button" type="button">
+        <button
+          className="submit-guess-button"
+          type="button"
+          onClick={handleOnClick}>
           Submit
         </button>
       </div>

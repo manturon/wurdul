@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import Game from "./Game";
 import "../style.css";
 import { Dictionary } from "../game/dictionary";
-
-declare global {
-  interface Window {
-    setAnswer(word: string): void;
-  }
-}
+import { Answer, randomAnswer } from "../game/game";
 
 const MAX_TRIES = 6;
 
@@ -18,7 +13,6 @@ export default function App() {
   useEffect(() => {
     Dictionary.attemptFromCache().then((dictionary) => {
       setDictionary(dictionary);
-      window['dictionary'] = dictionary;
     });
   }, []);
 
@@ -26,11 +20,14 @@ export default function App() {
     return "Loading...";
   }
 
+  const answer: Answer = randomAnswer(dictionary);
+  console.log("answer", answer);
+
   return (
     <DictionaryContext.Provider value={dictionary}>
       <div>
         <h1>Wurdul</h1>
-        <Game maxTries={MAX_TRIES} />
+        <Game maxTries={MAX_TRIES} answer={answer} />
       </div>
     </DictionaryContext.Provider>
   );

@@ -1,10 +1,10 @@
 import React from "react";
-import { MatchType } from "../game/matching";
+import { Match } from "../game/matching";
 import classNames, { Mapping } from "classnames";
 
 type Props = React.PropsWithChildren<{
   tag?: string;
-  match?: MatchType;
+  match?: Match;
   input?: boolean;
   invalid?: boolean;
 }>;

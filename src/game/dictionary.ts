@@ -1,4 +1,4 @@
-import { getTranscript, Transcript } from "./transcript";
+import { getTranscript, RawTranscript, Transcript } from "./transcript";
 
 interface RawDict {
   version: DictVersion;
@@ -14,7 +14,8 @@ interface DictVersion {
   date: Date;
   seq: number;
 }
-type RawDictMap = Map<string, string[]>;
+type DictMap = Map<string, RawTranscript[]>;
+type AnswerEntry = [transcript: RawTranscript, words: string[]];
 
 export class Dictionary {
   public static CACHE_NAME = "wurml-dict";
@@ -86,8 +87,8 @@ export class Dictionary {
     throw new Error("Invalid object for dictionary format");
   }
 
-  public readonly dict: RawDictMap;
-  public readonly answers: RawDictMap;
+  public readonly dict: DictMap;
+  public readonly answers: AnswerEntry[];
   public readonly version: DictVersion;
 
   public constructor(rawDict: RawDict, rawAnswers: RawAnswers) {
@@ -99,5 +100,10 @@ export class Dictionary {
 
   public wordTranscripts(word: string): Transcript[] {
     return this.dict.get(word)?.map(getTranscript) ?? [];
+  }
+
+  public answerByNumber(number: number): [Transcript, string[]] {
+    const [transcript, words] = this.answers.at(number % this.answers.length)!;
+    return [getTranscript(transcript), Array.from(words)];
   }
 }

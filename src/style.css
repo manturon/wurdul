@@ -57,13 +57,12 @@ body {
 }
 
 .game-board {
-  --coln: 5;
-  --rown: 6;
+  --cols: 5;
+  --rows: 6;
   display: grid;
-  grid-template-columns: repeat(var(--coln, 5), 3.5em);
-  grid-template-rows: repeat(var(--rown, 6), 2.5em);
+  grid-template-columns: repeat(var(--cols, 5), 3.5em);
+  grid-template-rows: repeat(var(--rows, 6), 2.5em);
   gap: 0.25em;
-
 }
 
 .choice-preview {
