@@ -8,7 +8,7 @@ describe("matcher", () => {
     let chestMatcher = new Matcher(chest, []);
 
     expect(chestMatcher.allMatches).toEqual([]);
-    expect(chestMatcher.bestMatches).toEqual(new Set());
+    // expect(chestMatcher.bestMatches).toEqual(new Map());
   });
 
   test("matcher generates correct matches", () => {

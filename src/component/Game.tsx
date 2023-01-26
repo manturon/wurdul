@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import { Answer } from "../game/game";
-import { Matcher } from "../game/matching";
+import { Match, Matcher } from "../game/matching";
 import Phoneme, { getPhonemeDescriptor } from "../game/phonemes";
 import { Transcript } from "../game/transcript";
-import { repeatWithProvider } from "../util";
+import { clamp, repeatWithProvider } from "../util";
 import { DictionaryContext } from "./App";
 import Block from "./Block";
 
@@ -25,8 +25,17 @@ export default function Game({ maxTries, answer }: Props) {
   const [history, setHistory] = useState<History>([]);
   const [wordInput, setWordInput] = useState<string>("");
   const transcriptsForInput = dictionary.wordTranscripts(wordInput.trim());
+  const [selectedTranscriptIndex, setSelectedTranscriptIndex] = useState(0);
+  const noTranscript = transcriptsForInput.length === 0;
 
-  const phonemeInput = transcriptsForInput[0] ?? []; // todo: chooser
+  if (transcriptsForInput.length) {
+    transcriptsForInput.sort((transcript) =>
+      transcript.length === colCount ? -1 : 0,
+    );
+    console.log(transcriptsForInput);
+  }
+
+  const phonemeInput = transcriptsForInput[selectedTranscriptIndex] ?? []; // todo: chooser
 
   const matcher = new Matcher(
     answer.transcript,
@@ -38,10 +47,12 @@ export default function Game({ maxTries, answer }: Props) {
   }) => {
     let value = currentTarget.value;
     setWordInput(value);
+    setSelectedTranscriptIndex(0);
   };
 
   const clearInput = () => {
     setWordInput("");
+    setSelectedTranscriptIndex(0);
   };
 
   const handleOnClick: React.MouseEventHandler<HTMLButtonElement> = () => {
@@ -52,6 +63,18 @@ export default function Game({ maxTries, answer }: Props) {
     if (key === "Enter") {
       commitInput();
     }
+  };
+
+  const handleOnClickPrevChoice = () => {
+    setSelectedTranscriptIndex((selectedTranscriptIndex) =>
+      clamp(selectedTranscriptIndex - 1, 0, transcriptsForInput.length - 1),
+    );
+  };
+
+  const handleOnClickNextChoice = () => {
+    setSelectedTranscriptIndex((selectedTranscriptIndex) =>
+      clamp(selectedTranscriptIndex + 1, 0, transcriptsForInput.length - 1),
+    );
   };
 
   const commitInput = () => {
@@ -145,14 +168,11 @@ export default function Game({ maxTries, answer }: Props) {
     const historyBlocks = history.flatMap((entry, j) => {
       const rowMatches = matches[j];
       const transcript = entry.transcript;
-      return transcript.map((phoneme, k) => {
-        const pd = getPhonemeDescriptor(phoneme);
-        return (
-          <Block key={i++} match={rowMatches[k]}>
-            {pd.key}
-          </Block>
-        );
-      });
+      return transcript.map(getPhonemeDescriptor).map((pd, k) => (
+        <Block key={i++} match={rowMatches[k]}>
+          {pd.key}
+        </Block>
+      ));
     });
     const inputBlocks = phonemeInput
       .slice(0, colCount)
@@ -177,6 +197,32 @@ export default function Game({ maxTries, answer }: Props) {
     return [...historyBlocks, ...inputBlocks, ...emptyBlocks];
   };
 
+  const makeWordPreview = () => {
+    const matches = matcher.bestMatches;
+    const blocks = phonemeInput.map(getPhonemeDescriptor).map((pd, index) => {
+      if (index >= colCount) {
+        return (
+          <Block key={index} invalid={true}>
+            {pd.key}
+          </Block>
+        );
+      }
+      let match = matches.get(pd.key as Phoneme)?.get(index) ?? Match.UNKNOWN;
+      return (
+        <Block key={index} match={match}>
+          {pd.key}
+        </Block>
+      );
+    });
+    const emptyBlocks = repeatWithProvider(
+      colCount - blocks.length,
+      (index) => (
+        <Block invalid={index >= colCount} key={blocks.length + index}></Block>
+      ),
+    );
+    return blocks.concat(emptyBlocks);
+  };
+
   return (
     <div className="game">
       <div
@@ -186,7 +232,7 @@ export default function Game({ maxTries, answer }: Props) {
         }>
         {makeBoard()}
       </div>
-      <div className="game-input">
+      <div className={`game-input ${noTranscript ? "no-transcript" : ""}`}>
         <input
           className="word-input"
           type="text"
@@ -194,13 +240,34 @@ export default function Game({ maxTries, answer }: Props) {
           onKeyUp={handleOnKeyUp}
           value={wordInput}
         />
-        <div className="word-preview"></div>
         <button
           className="submit-guess-button"
           type="button"
           onClick={handleOnClick}>
           Submit
         </button>
+        <div className="word-preview">{makeWordPreview()}</div>
+        <div className="transcript-chooser">
+          <button
+            className="prev-choice"
+            onClick={handleOnClickPrevChoice}
+            disabled={noTranscript}>
+            &larr;
+          </button>
+          <div className="choice-count">
+            {noTranscript
+              ? "Empty"
+              : `${selectedTranscriptIndex + 1} / ${
+                  transcriptsForInput.length
+                }`}
+          </div>
+          <button
+            className="next-choice"
+            onClick={handleOnClickNextChoice}
+            disabled={noTranscript}>
+            &rarr;
+          </button>
+        </div>
       </div>
       <div className="game-summary">
         <div className="summary-board">

@@ -22,6 +22,7 @@ export default function App() {
 
   const answer: Answer = randomAnswer(dictionary);
   console.log("answer", answer);
+  console.log("answer transcript", answer.transcript);
 
   return (
     <DictionaryContext.Provider value={dictionary}>

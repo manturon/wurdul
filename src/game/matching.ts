@@ -1,4 +1,4 @@
-import { count, countWithIndex } from "../util";
+import { count, countWithIndex, repeatWithProvider } from "../util";
 import Phoneme from "./phonemes";
 import { Transcript } from "./transcript";
 
@@ -75,7 +75,38 @@ export class Matcher {
   }
 
   public get bestMatches() {
-    return new Set;
+    let matches: Map<Phoneme, Map<number, Match>> = new Map();
+    for (const [i, row] of this._matches.entries()) {
+      for (const [j, match] of row.entries()) {
+        const phoneme = this.guesses[i][j];
+        let map = matches.get(phoneme);
+        if (!map) {
+          map = new Map();
+          matches.set(phoneme, map);
+        }
+        if (match === Match.MATCH) {
+          map.set(j, Match.MATCH);
+        } else if (match === Match.NO_MATCH) {
+          map.set(j, Match.NO_MATCH);
+        } else if (!map.has(j)) {
+          map.set(j, Match.SOME_MATCH);
+        }
+      }
+    }
+    matches.forEach((_map, phoneme) => {
+      if ((this._phonemeCount.get(phoneme) ?? 0) === 0) {
+        matches.set(
+          phoneme,
+          new Map(
+            repeatWithProvider(this.expected.length, (index) => [
+              index,
+              Match.NO_MATCH,
+            ]),
+          ),
+        );
+      }
+    });
+    return matches;
   }
 
   public bestForPhoneme(phoneme: Phoneme): Match {
