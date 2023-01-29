@@ -3,7 +3,8 @@ import { Answer } from "../game/game";
 import { Match, Matcher } from "../game/matching";
 import Phoneme, { getPhonemeDescriptor } from "../game/phonemes";
 import { Transcript } from "../game/transcript";
-import { clamp, repeatWithProvider } from "../util";
+import strings from "../strings";
+import { capitalize, clamp, repeatWithProvider, translate } from "../util";
 import { DictionaryContext } from "./App";
 import Block from "./Block";
 
@@ -27,6 +28,7 @@ export default function Game({ maxTries, answer }: Props) {
   const transcriptsForInput = dictionary.wordTranscripts(wordInput.trim());
   const [selectedTranscriptIndex, setSelectedTranscriptIndex] = useState(0);
   const noTranscript = transcriptsForInput.length === 0;
+  const singleTranscript = transcriptsForInput.length === 1;
 
   if (transcriptsForInput.length) {
     transcriptsForInput.sort((transcript) =>
@@ -239,33 +241,61 @@ export default function Game({ maxTries, answer }: Props) {
           onInput={handleOnInput}
           onKeyUp={handleOnKeyUp}
           value={wordInput}
+          placeholder={capitalize(strings.input.placeholder)}
         />
         <button
           className="submit-guess-button"
           type="button"
-          onClick={handleOnClick}>
-          Submit
+          onClick={handleOnClick}
+          title={capitalize(strings.input.submitAlt)}>
+          {capitalize(strings.input.submit)}
         </button>
         <div className="word-preview">{makeWordPreview()}</div>
         <div className="transcript-chooser">
           <button
             className="prev-choice"
+            type="button"
             onClick={handleOnClickPrevChoice}
-            disabled={noTranscript}>
-            &larr;
+            disabled={
+              noTranscript || singleTranscript || selectedTranscriptIndex == 0
+            }
+            title={capitalize(strings.input.previousAlt)}>
+            {/*strings.input.previous*/}
+            &lt;
           </button>
-          <div className="choice-count">
-            {noTranscript
-              ? "Empty"
-              : `${selectedTranscriptIndex + 1} / ${
-                  transcriptsForInput.length
-                }`}
+          <div
+            className="choice-count"
+            title={capitalize(
+              translate(
+                strings.input.currentAlt,
+                selectedTranscriptIndex + 1,
+                transcriptsForInput.length,
+              ),
+            )}>
+            {capitalize(
+              noTranscript
+                ? strings.input.currentEmpty
+                : singleTranscript
+                ? strings.input.currentSingle
+                : translate(
+                    strings.input.current,
+                    selectedTranscriptIndex + 1,
+                    transcriptsForInput.length,
+                  ),
+            )}
           </div>
           <button
             className="next-choice"
+            type="button"
             onClick={handleOnClickNextChoice}
-            disabled={noTranscript}>
-            &rarr;
+            disabled={
+              noTranscript ||
+              singleTranscript ||
+              selectedTranscriptIndex == transcriptsForInput.length - 1
+            }
+            title={capitalize(strings.input.nextAlt)}>
+            {/*strings.input.next*/}
+            &gt;
           </button>
         </div>
       </div>
