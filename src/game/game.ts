@@ -28,7 +28,6 @@ export enum InvalidInputReason {
   EMPTY,
   TOO_SHORT,
   TOO_LONG,
-  GAME_OVER,
   NOT_IN_WORD_LIST,
 }
 
@@ -60,4 +59,20 @@ export async function answerForDate(
     type: AnswerType.DAILY,
     words,
   };
+}
+
+export function checkValidity(dictionary: Dictionary, expected: Answer, word?: string, transcript?: Transcript) {
+  if (!word || !transcript) {
+    return InvalidInputReason.EMPTY;
+  }
+  if (!dictionary.hasWord(word)) {
+    return InvalidInputReason.NOT_IN_WORD_LIST;
+  }
+  if (transcript.length < expected.transcript.length) {
+    return InvalidInputReason.TOO_SHORT;
+  }
+  if (transcript.length > expected.transcript.length) {
+    return InvalidInputReason.TOO_LONG;
+  }
+  return true;
 }

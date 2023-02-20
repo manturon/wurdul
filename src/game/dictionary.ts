@@ -102,6 +102,10 @@ export class Dictionary {
     return this.dict.get(word)?.map(getTranscript) ?? [];
   }
 
+  public hasWord(word: string) {
+    return this.dict.has(word);
+  }
+
   public answerByNumber(number: number): [Transcript, string[]] {
     const [transcript, words] = this.answers.at(number % this.answers.length)!;
     return [getTranscript(transcript), Array.from(words)];

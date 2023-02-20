@@ -3,6 +3,7 @@ import Game from "./Game";
 import "../style.css";
 import { Dictionary } from "../game/dictionary";
 import { Answer, randomAnswer } from "../game/game";
+import Header from "./Header";
 
 const MAX_TRIES = 6;
 
@@ -21,13 +22,11 @@ export default function App() {
   }
 
   const answer: Answer = randomAnswer(dictionary);
-  console.log("answer", answer);
-  console.log("answer transcript", answer.transcript);
 
   return (
     <DictionaryContext.Provider value={dictionary}>
-      <div>
-        <h1>Wurdul</h1>
+      <div className="game-wrapper">
+        <Header answer={answer} />
         <Game maxTries={MAX_TRIES} answer={answer} />
       </div>
     </DictionaryContext.Provider>

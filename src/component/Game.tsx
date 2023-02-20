@@ -1,7 +1,8 @@
 import React, { useContext, useState } from "react";
-import { Answer } from "../game/game";
+import { Answer, checkValidity, InvalidInputReason } from "../game/game";
 import { Match, Matcher } from "../game/matching";
 import Phoneme, { getPhonemeDescriptor } from "../game/phonemes";
+import { CONSONANTS_LAYOUT, Layout, VOWELS_LAYOUT } from "../game/summary";
 import { Transcript } from "../game/transcript";
 import strings from "../strings";
 import { capitalize, clamp, repeatWithProvider, translate } from "../util";
@@ -29,15 +30,16 @@ export default function Game({ maxTries, answer }: Props) {
   const [selectedTranscriptIndex, setSelectedTranscriptIndex] = useState(0);
   const noTranscript = transcriptsForInput.length === 0;
   const singleTranscript = transcriptsForInput.length === 1;
+  const gameOver = history.length == maxTries;
 
   if (transcriptsForInput.length) {
     transcriptsForInput.sort((transcript) =>
       transcript.length === colCount ? -1 : 0,
     );
-    console.log(transcriptsForInput);
   }
 
-  const phonemeInput = transcriptsForInput[selectedTranscriptIndex] ?? []; // todo: chooser
+  const phonemeInput = transcriptsForInput[selectedTranscriptIndex] ?? [];
+  const validity = checkValidity(dictionary, answer, wordInput, phonemeInput);
 
   const matcher = new Matcher(
     answer.transcript,
@@ -64,19 +66,25 @@ export default function Game({ maxTries, answer }: Props) {
   const handleOnKeyUp: React.KeyboardEventHandler = ({ key }) => {
     if (key === "Enter") {
       commitInput();
+    } else if (key === "ArrowUp" || key === "PageUp") {
+      offsetChoice(-1);
+    } else if (key === "ArrowDown" || key === "PageDown") {
+      offsetChoice(1);
     }
   };
 
-  const handleOnClickPrevChoice = () => {
+  const offsetChoice = (offset: number) => {
     setSelectedTranscriptIndex((selectedTranscriptIndex) =>
-      clamp(selectedTranscriptIndex - 1, 0, transcriptsForInput.length - 1),
+      clamp(selectedTranscriptIndex + offset, 0, transcriptsForInput.length - 1),
     );
+  }
+
+  const handleOnClickPrevChoice = () => {
+    offsetChoice(-1);
   };
 
   const handleOnClickNextChoice = () => {
-    setSelectedTranscriptIndex((selectedTranscriptIndex) =>
-      clamp(selectedTranscriptIndex + 1, 0, transcriptsForInput.length - 1),
-    );
+    offsetChoice(1);
   };
 
   const commitInput = () => {
@@ -90,65 +98,6 @@ export default function Game({ maxTries, answer }: Props) {
     ]);
     clearInput();
   };
-
-  type LayoutRow = Phoneme[];
-  type Layout = LayoutRow[];
-
-  const CONSONANTS_LAYOUT: Layout = [
-    [
-      Phoneme.B,
-      Phoneme.D,
-      Phoneme.G,
-      Phoneme.F,
-      Phoneme.H,
-      Phoneme.S,
-      Phoneme.TH,
-      Phoneme.SH,
-      Phoneme.CH,
-    ],
-    [
-      Phoneme.P,
-      Phoneme.T,
-      Phoneme.K,
-      Phoneme.V,
-      Phoneme.Z,
-      Phoneme.DH,
-      Phoneme.ZH,
-      Phoneme.J,
-    ],
-    [
-      Phoneme.L,
-      Phoneme.R,
-      Phoneme.W,
-      Phoneme.Y,
-      Phoneme.M,
-      Phoneme.N,
-      Phoneme.NG,
-    ],
-  ];
-
-  const VOWELS_LAYOUT: Layout = [
-    [
-      Phoneme.ARE,
-      Phoneme.ERR,
-      Phoneme.EAR,
-      Phoneme.OOR,
-      Phoneme.ER,
-      Phoneme.IRE,
-      Phoneme.OR,
-      Phoneme.OUR,
-    ],
-    [
-      Phoneme.AO,
-      Phoneme.EY,
-      Phoneme.EE,
-      Phoneme.EYE,
-      Phoneme.OH,
-      Phoneme.OO,
-      Phoneme.OY,
-    ],
-    [Phoneme.AA, Phoneme.EH, Phoneme.I, Phoneme.AWE, Phoneme.U, Phoneme.UH],
-  ];
 
   const makeSummaryBoard = (layout: Layout) =>
     layout.map((row, index) => (
@@ -246,6 +195,7 @@ export default function Game({ maxTries, answer }: Props) {
         <button
           className="submit-guess-button"
           type="button"
+          disabled={validity !== true}
           onClick={handleOnClick}
           title={capitalize(strings.input.submitAlt)}>
           {capitalize(strings.input.submit)}
@@ -261,7 +211,7 @@ export default function Game({ maxTries, answer }: Props) {
             }
             title={capitalize(strings.input.previousAlt)}>
             {/*strings.input.previous*/}
-            &lt;
+            &uarr;
           </button>
           <div
             className="choice-count"
@@ -295,7 +245,7 @@ export default function Game({ maxTries, answer }: Props) {
             }
             title={capitalize(strings.input.nextAlt)}>
             {/*strings.input.next*/}
-            &gt;
+            &darr;
           </button>
         </div>
       </div>
@@ -307,12 +257,4 @@ export default function Game({ maxTries, answer }: Props) {
       </div>
     </div>
   );
-
-  /*
-  return <div>
-    <Board></Board>
-    <Input></Input>
-    <Summary></Summary>
-  </div>;
-  */
 }
