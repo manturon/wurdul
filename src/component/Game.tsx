@@ -6,7 +6,7 @@ import { CONSONANTS_LAYOUT, Layout, VOWELS_LAYOUT } from "../game/summary";
 import { Transcript } from "../game/transcript";
 import strings from "../strings";
 import { capitalize, clamp, repeatWithProvider, translate } from "../util";
-import { DictionaryContext } from "./App";
+import { DictionaryContext, GameCacheContext } from "./App";
 import Block from "./Block";
 
 interface Props {
@@ -14,17 +14,18 @@ interface Props {
   answer: Answer;
 }
 
-interface HistoryEntry {
+export interface HistoryEntry {
   transcript: Transcript;
   word: string;
 }
-type History = HistoryEntry[];
+export type History = HistoryEntry[];
 
 export default function Game({ maxTries, answer }: Props) {
   const colCount = answer.transcript.length;
   const dictionary = useContext(DictionaryContext);
+  const cache = useContext(GameCacheContext);
 
-  const [history, setHistory] = useState<History>([]);
+  const [history, setHistory] = useState<History>(cache?.history ?? []);
   const [wordInput, setWordInput] = useState<string>("");
   const transcriptsForInput = dictionary.wordTranscripts(wordInput.trim());
   const [selectedTranscriptIndex, setSelectedTranscriptIndex] = useState(0);
@@ -64,20 +65,29 @@ export default function Game({ maxTries, answer }: Props) {
   };
 
   const handleOnKeyUp: React.KeyboardEventHandler = ({ key }) => {
-    if (key === "Enter") {
-      commitInput();
-    } else if (key === "ArrowUp" || key === "PageUp") {
-      offsetChoice(-1);
-    } else if (key === "ArrowDown" || key === "PageDown") {
-      offsetChoice(1);
+    if (!gameOver) {
+      if (key === "Enter") {
+        commitInput();
+      } else if (key === "ArrowUp" || key === "PageUp") {
+        offsetChoice(-1);
+      } else if (key === "ArrowDown" || key === "PageDown") {
+        offsetChoice(1);
+      }
     }
   };
 
   const offsetChoice = (offset: number) => {
+    if (gameOver) {
+      return;
+    }
     setSelectedTranscriptIndex((selectedTranscriptIndex) =>
-      clamp(selectedTranscriptIndex + offset, 0, transcriptsForInput.length - 1),
+      clamp(
+        selectedTranscriptIndex + offset,
+        0,
+        transcriptsForInput.length - 1,
+      ),
     );
-  }
+  };
 
   const handleOnClickPrevChoice = () => {
     offsetChoice(-1);
@@ -88,14 +98,17 @@ export default function Game({ maxTries, answer }: Props) {
   };
 
   const commitInput = () => {
-    if (!phonemeInput?.length || phonemeInput.length != colCount) {
-      // todo: check if input is valid & so on
+    if (gameOver || !phonemeInput?.length || phonemeInput.length != colCount) {
       return;
     }
-    setHistory((history) => [
-      ...history,
-      { transcript: phonemeInput, word: wordInput },
-    ]);
+    setHistory((history) => {
+      const newHistory = [
+        ...history,
+        { transcript: phonemeInput, word: wordInput },
+      ];
+      cache?.update(newHistory);
+      return newHistory;
+    });
     clearInput();
   };
 

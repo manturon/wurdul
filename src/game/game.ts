@@ -47,14 +47,14 @@ export const WURDUL_EPOCH = new Date(2022, 10, 12).getTime();
 export const getWurdulDayForDate = (date: number) =>
   Math.floor((date - WURDUL_EPOCH) / 1000 / 60 / 60 / 24);
 
-export async function answerForDate(
+export function answerForDate(
   dictionary: Dictionary,
   date: number,
-): Promise<Answer> {
+): Answer {
   const n = getWurdulDayForDate(date);
   const [transcript, words] = dictionary.answerByNumber(n);
   return {
-    index: undefined,
+    index: n,
     transcript,
     type: AnswerType.DAILY,
     words,
