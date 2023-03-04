@@ -40,7 +40,6 @@ export const Header = ({ answer, changeMode, rollAnswer }: Props) => {
     <header className="game-header">
       <div className="title">
         <h1>Wurdul 🐛</h1>
-        {answer?.words[0]}
         {answerInfo}
       </div>
       <div className="change-mode">

@@ -63,7 +63,6 @@ class GameCache {
   }
 
   save() {
-    console.log("saving", this);
     window.localStorage.setItem(
       "wurdul-daily",
       window.btoa(JSON.stringify(this)),
