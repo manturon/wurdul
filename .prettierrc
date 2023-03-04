@@ -1,6 +1,11 @@
 {
-  "tabWidth": 2,
-  "useTabs": false,
-  "arrowParens": "avoid",
-  "endOfLine": "lf"
+  "trailingComma": "all",
+  "quoteProps": "preserve",
+  "embeddedLanguageFormatting": "auto",
+  "printWidth": 80,
+  "singleQuote": false,
+  "bracketSameLine": true,
+  "htmlWhitespaceSensitivity": "ignore",
+  "bracketSpacing": true,
+  "arrowParens": "always"
 }
