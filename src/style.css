@@ -84,11 +84,58 @@ body {
   --cols: 5;
   --rows: 6;
   display: grid;
-  grid-template-columns: repeat(var(--cols, 5), max(3.5em, calc(
-    (100% - 0.25em * (var(--cols) - 1)) / var(--cols)
-  )));
+  grid-template-columns: repeat(
+    var(--cols, 5),
+    max(3.5em, calc((100% - 0.25em * (var(--cols) - 1)) / var(--cols)))
+  );
   grid-template-rows: repeat(var(--rows, 6), 2.5em);
   gap: 0.25em;
+}
+
+.game-over .game-board {
+  grid-template-rows: repeat(var(--rows, 6), 1.5em);
+}
+
+.game-over-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+
+.game-over-screen .explanation {
+  padding: 0.5em;
+  border-radius: 0.25em;
+}
+
+.game-over-screen .explanation p {
+  margin: 0;
+  text-align: center;
+}
+
+.game-over-screen .explanation h2 {
+  text-align: center;
+  font-size: 1.5em;
+  line-height: 1;
+  margin: 0;
+  margin-bottom: 0.25em;
+}
+
+.game-over-screen.lost .explanation {
+  background: var(--invinp-bgc);
+  color: var(--invinp-fgc);
+}
+
+.game-over-screen .word-preview {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25em;
+  height: 2em;
+}
+
+.game-over-screen .word-preview .block {
+  flex: 1 1 0;
+  background: var(--mat-bgc);
+  color: var(--mat-fgc);
 }
 
 .choice-preview {
@@ -219,7 +266,6 @@ body {
   line-height: 0;
 }
 
-
 .game-input .transcript-chooser .prev-choice:enabled,
 .game-input .transcript-chooser .next-choice:enabled {
   background: var(--sommat-bgc);
@@ -257,7 +303,7 @@ body {
 
 .game-input .word-preview::after {
   display: block;
-  content: '';
+  content: "";
   position: absolute;
   background: linear-gradient(90deg, transparent, white);
   width: 5em;

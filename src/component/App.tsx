@@ -1,14 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Game, { History } from "./Game";
 import "../style.css";
 import { Dictionary } from "../game/dictionary";
-import {
-  Answer,
-  answerForDate,
-  AnswerType,
-  MatchHistory,
-  randomAnswer,
-} from "../game/game";
+import { Answer, answerForDate, AnswerType, randomAnswer } from "../game/game";
 import Header from "./Header";
 
 const MAX_TRIES = 6;
@@ -19,7 +13,7 @@ class GameCache {
   date: number;
 
   static fromCache(answer: Answer) {
-    const source = window.localStorage.getItem("wurdul");
+    const source = window.localStorage.getItem("wurdul-daily");
     let object = null;
     if (source) {
       try {
@@ -46,10 +40,15 @@ class GameCache {
         cache.date = object["date"];
         return cache;
       }
+      console.debug("Cache doesn't match today's answer, removing...");
     }
-    const cache = new GameCache(answer);
-    cache.save();
-    return cache;
+    if (AnswerType.DAILY) {
+      const cache = new GameCache(answer);
+      cache.save();
+      return cache;
+    } else {
+      return null;
+    }
   }
 
   constructor(answer: Answer) {
@@ -64,7 +63,11 @@ class GameCache {
   }
 
   save() {
-    window.localStorage.setItem("wurdul", window.btoa(JSON.stringify(this)));
+    console.log("saving", this);
+    window.localStorage.setItem(
+      "wurdul-daily",
+      window.btoa(JSON.stringify(this)),
+    );
   }
 }
 
@@ -73,25 +76,44 @@ export const GameCacheContext = React.createContext<GameCache | null>(null!);
 
 export default function App() {
   const [dictionary, setDictionary] = useState<Dictionary | null>(null);
+  const [mode, setMode] = useState<AnswerType>(AnswerType.DAILY);
+  const [answer, setAnswer] = useState<Answer | null>(null);
   useEffect(() => {
     Dictionary.attemptFromCache().then((dictionary) => {
       setDictionary(dictionary);
     });
   }, []);
 
-  if (!dictionary) {
+  const grabAnswer = useCallback(() => {
+    setAnswer(
+      mode === AnswerType.DAILY
+        ? answerForDate(dictionary!, Date.now())
+        : randomAnswer(dictionary!),
+    );
+  }, [dictionary, mode]);
+  useEffect(() => {
+    if (dictionary) {
+      grabAnswer();
+    } else {
+      setAnswer(null);
+    }
+  }, [mode, dictionary, grabAnswer]);
+
+  if (!dictionary || !answer) {
     return "Loading...";
   }
 
-  // const answer: Answer = randomAnswer(dictionary);
-  const answer: Answer = answerForDate(dictionary, Date.now());
-
   return (
     <DictionaryContext.Provider value={dictionary}>
-      <GameCacheContext.Provider value={GameCache.fromCache(answer)}>
+      <GameCacheContext.Provider
+        value={mode === AnswerType.DAILY ? GameCache.fromCache(answer) : null}>
         <div className="game-wrapper">
-          <Header answer={answer} />
-          <Game maxTries={MAX_TRIES} answer={answer} />
+          <Header
+            answer={answer!}
+            changeMode={(mode: AnswerType) => setMode(mode)}
+            rollAnswer={() => grabAnswer()}
+          />
+          <Game answer={answer} maxTries={MAX_TRIES} />
         </div>
       </GameCacheContext.Provider>
     </DictionaryContext.Provider>
