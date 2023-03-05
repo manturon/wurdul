@@ -1,5 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Answer, checkValidity, InvalidInputReason } from "../game/game";
+import {
+  Answer,
+  AnswerType,
+  checkValidity,
+  InvalidInputReason,
+} from "../game/game";
 import { Match, Matcher } from "../game/matching";
 import Phoneme, { getPhonemeDescriptor } from "../game/phonemes";
 import { CONSONANTS_LAYOUT, Layout, VOWELS_LAYOUT } from "../game/summary";
@@ -32,7 +37,8 @@ export default function Game({ maxTries, answer }: Props) {
   const transcriptsForInput = dictionary.wordTranscripts(wordInput.trim());
   const noTranscript = transcriptsForInput.length === 0;
   const singleTranscript = transcriptsForInput.length === 1;
-  const wonGame = history.at(-1)?.transcript.toString() === answer.transcript.toString();
+  const wonGame =
+    history.at(-1)?.transcript.toString() === answer.transcript.toString();
   const gameOver = wonGame || history.length === maxTries;
   if (transcriptsForInput.length) {
     transcriptsForInput.sort((transcript) =>
@@ -44,7 +50,7 @@ export default function Game({ maxTries, answer }: Props) {
     setHistory(cache?.history ?? []);
     setWordInput("");
     setSelectedTranscriptIndex(0);
-  }, [answer, maxTries])
+  }, [answer, maxTries]);
 
   const phonemeInput = transcriptsForInput[selectedTranscriptIndex] ?? [];
   const validity = checkValidity(dictionary, answer, wordInput, phonemeInput);
@@ -268,15 +274,45 @@ export default function Game({ maxTries, answer }: Props) {
     </div>
   );
 
+  const copyShare = () => {
+    const history = matcher.allMatches
+      .map((row) =>
+        row.map((matchType) => {
+          switch (matchType) {
+            case Match.MATCH:
+              return "🟩";
+            case Match.SOME_MATCH:
+              return "🟨";
+            default:
+              return "⬛️";
+          }
+        }).join(''),
+      )
+      .join("\n");
+    const title =
+      answer.type === AnswerType.DAILY
+        ? "Daily Wurdul #" + answer.index
+        : "Wurdul";
+    const url = "https://manturon.github.io/wurdul/";
+    const text = `${title}\n\n${history}\n\n${url}`;
+
+    navigator.clipboard.writeText(text);
+  };
+
   const makeGameOverScreen = () => {
     if (wonGame) {
       return (
         <div className="game-over-screen won">
           <div className="explanation">
             <h2>Good job!</h2>
-            <p>
-              You correctly guessed the word.
-            </p>
+            <p>You correctly guessed the word.</p>
+            {answer.type === AnswerType.DAILY ? (
+              <p>
+                <a className="share" onClick={copyShare}>Copy to clipboard</a>
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
       );
@@ -288,11 +324,21 @@ export default function Game({ maxTries, answer }: Props) {
             <p>
               You didn't guess the word in the expected amount of tries.
               <br />
-              The word was {answer.words.map(word => <b>{word.toUpperCase()}</b>).at(0)}.
+              The word was{" "}
+              {answer.words.map((word) => <b>{word.toUpperCase()}</b>).at(0)}.
             </p>
+            {answer.type === AnswerType.DAILY ? (
+              <p>
+                <a className="share" onClick={copyShare}>Copy to clipboard</a>
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="word-preview">
-            {answer.transcript.map((phoneme, index) => <Block key={index}>{phoneme}</Block>)}
+            {answer.transcript.map((phoneme, index) => (
+              <Block key={index}>{phoneme}</Block>
+            ))}
           </div>
         </div>
       );

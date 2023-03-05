@@ -108,8 +108,17 @@ body {
 }
 
 .game-over-screen .explanation p {
-  margin: 0;
   text-align: center;
+}
+
+.game-over-screen .explanation p:last-child {
+  margin-bottom: 0;
+}
+
+.game-over-screen .explanation .share {
+  font-weight: bold;
+  color: var(--acc-bgc);
+  cursor: pointer;
 }
 
 .game-over-screen .explanation h2 {
