@@ -40,9 +40,8 @@ class GameCache {
         cache.date = object["date"];
         return cache;
       }
-      console.debug("Cache doesn't match today's answer, removing...");
     }
-    if (AnswerType.DAILY) {
+    if (answer.type === AnswerType.DAILY) {
       const cache = new GameCache(answer);
       cache.save();
       return cache;

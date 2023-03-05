@@ -20,18 +20,18 @@ export const Header = ({ answer, changeMode, rollAnswer }: Props) => {
       text = strings.gameType[AnswerType.DAILY] + " #" + answer.index;
     } else {
       text = strings.gameType[mode];
+      rollButton = (
+        <button type="button" onClick={() => rollAnswer()}>
+          roll new word
+        </button>
+      );
     }
     answerInfo = <div className="game-info">{capitalize(text)}</div>;
     const otherMode =
       mode === AnswerType.DAILY ? AnswerType.RANDOM : AnswerType.DAILY;
     changeModeButton = (
       <button type="button" onClick={() => changeMode(otherMode)}>
-        {strings.gameType[otherMode]}
-      </button>
-    );
-    rollButton = (
-      <button type="button" onClick={() => rollAnswer()}>
-        roll new word
+        {"play " + strings.gameType[otherMode]}
       </button>
     );
   }
