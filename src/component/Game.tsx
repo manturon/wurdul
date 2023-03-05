@@ -60,12 +60,11 @@ export default function Game({ maxTries, answer }: Props) {
     history.map((entry) => entry.transcript),
   );
 
-  const handleOnInput: React.FormEventHandler<HTMLInputElement> = ({
-    currentTarget,
-  }) => {
-    let value = currentTarget.value;
+  const handleOnInput: React.FormEventHandler<HTMLInputElement> = (event) => {
+    let value = event.currentTarget.value;
     setWordInput(value);
     setSelectedTranscriptIndex(0);
+    event.stopPropagation();
   };
 
   const clearInput = () => {
@@ -212,7 +211,6 @@ export default function Game({ maxTries, answer }: Props) {
         type="text"
         onChange={handleOnInput}
         onKeyUp={handleOnKeyUp}
-        value={wordInput}
         placeholder={capitalize(strings.input.placeholder)}
       />
       <button
