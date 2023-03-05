@@ -210,7 +210,7 @@ export default function Game({ maxTries, answer }: Props) {
       <input
         className="word-input"
         type="text"
-        onInput={handleOnInput}
+        onChange={handleOnInput}
         onKeyUp={handleOnKeyUp}
         value={wordInput}
         placeholder={capitalize(strings.input.placeholder)}
