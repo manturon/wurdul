@@ -1,3 +1,5 @@
+import React from "react";
+
 /**
  * Choose and return a random element from `array`.
  */
@@ -81,6 +83,35 @@ export function translate(string: string, ...args: any[]) {
   );
 }
 
+export function translateElement(
+  string: string,
+  ...args: (string | React.ReactElement)[]
+): (string | React.ReactElement)[] {
+  const replacements: [[number, number], string | React.ReactElement][] = [];
+  for (const [index, replacement] of args.entries()) {
+    const indexPair = Array.from(
+      string.matchAll(new RegExp(":" + index, "g")),
+      (match): [number, number] => [
+        match.index!,
+        match.index! + match[0].length,
+      ],
+    );
+    for (const pair of indexPair) {
+      replacements.push([pair, replacement]);
+    }
+  }
+  replacements.sort(([a], [b]) => a[0] - b[0]);
+  const elems = [];
+  let index = 0;
+  for (const [indices, replacement] of replacements) {
+    elems.push(string.slice(index, indices[0]));
+    elems.push(replacement);
+    index = indices[1];
+  }
+  elems.push(string.slice(index));
+  return elems;
+}
+
 /**
  * Count the number of times a value appears in `iterable`.
  * @returns A `Map` where the keys are values in `iterable`,
@@ -112,4 +143,16 @@ export function countWithIndex<T>(iterable: Iterable<T>): Map<T, Set<number>> {
     i += 1;
   }
   return map;
+}
+
+export function getUTCTime(date: Date) {
+  return new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+    date.getUTCMilliseconds(),
+  ).getTime();
 }
