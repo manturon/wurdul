@@ -113,3 +113,15 @@ export function countWithIndex<T>(iterable: Iterable<T>): Map<T, Set<number>> {
   }
   return map;
 }
+
+export function getUTCTime(date: Date) {
+  return new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+    date.getUTCMilliseconds(),
+  ).getTime();
+}

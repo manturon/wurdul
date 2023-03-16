@@ -9,7 +9,7 @@ interface Props {
   rollAnswer: () => void;
 }
 
-export const Header = ({ answer, changeMode, rollAnswer }: Props) => {
+export function Header({ answer, changeMode, rollAnswer }: Props) {
   let answerInfo = undefined;
   let changeModeButton = undefined;
   let rollButton = undefined;

@@ -4,6 +4,7 @@ import "../style.css";
 import { Dictionary } from "../game/dictionary";
 import { Answer, answerForDate, AnswerType, randomAnswer } from "../game/game";
 import Header from "./Header";
+import { getUTCTime } from "../util";
 
 const MAX_TRIES = 6;
 
@@ -85,7 +86,7 @@ export default function App() {
   const grabAnswer = useCallback(() => {
     setAnswer(
       mode === AnswerType.DAILY
-        ? answerForDate(dictionary!, Date.now())
+        ? answerForDate(dictionary!, getUTCTime(new Date()))
         : randomAnswer(dictionary!),
     );
   }, [dictionary, mode]);
