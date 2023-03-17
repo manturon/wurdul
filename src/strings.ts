@@ -19,4 +19,16 @@ export default {
     [AnswerType.RANDOM]: "random",
     [AnswerType.CUSTOM]: "custom",
   },
+  scoring: {
+    win: {
+      title: "Good job!",
+      subtitle: "You correctly guessed the word.",
+    },
+    lose: {
+      title: "Too bad!",
+      subtitle: "You didn't guess the word in the expected amount of tries.",
+    },
+    whichOnlyOne: "The word was :0.",
+    copyToClipboard: "Copy to clipboard",
+  }
 };

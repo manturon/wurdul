@@ -1,3 +1,5 @@
+import React from "react";
+
 /**
  * Choose and return a random element from `array`.
  */
@@ -79,6 +81,35 @@ export function translate(string: string, ...args: any[]) {
     (string, arg, index) => string.replaceAll(":" + index, arg),
     string,
   );
+}
+
+export function translateElement(
+  string: string,
+  ...args: (string | React.ReactElement)[]
+): (string | React.ReactElement)[] {
+  const replacements: [[number, number], string | React.ReactElement][] = [];
+  for (const [index, replacement] of args.entries()) {
+    const indexPair = Array.from(
+      string.matchAll(new RegExp(":" + index, "g")),
+      (match): [number, number] => [
+        match.index!,
+        match.index! + match[0].length,
+      ],
+    );
+    for (const pair of indexPair) {
+      replacements.push([pair, replacement]);
+    }
+  }
+  replacements.sort(([a], [b]) => a[0] - b[0]);
+  const elems = [];
+  let index = 0;
+  for (const [indices, replacement] of replacements) {
+    elems.push(string.slice(index, indices[0]));
+    elems.push(replacement);
+    index = indices[1];
+  }
+  elems.push(string.slice(index));
+  return elems;
 }
 
 /**
