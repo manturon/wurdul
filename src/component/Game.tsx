@@ -145,7 +145,7 @@ export default function Game({ maxTries, answer }: Props) {
       const rowMatches = matches[j];
       const transcript = entry.transcript;
       return transcript.map(getPhonemeDescriptor).map((pd, k) => (
-        <Block key={i++} match={rowMatches[k]}>
+        <Block key={i++} match={rowMatches[k]} tag={pd.ipa}>
           {pd.key}
         </Block>
       ));
@@ -162,7 +162,7 @@ export default function Game({ maxTries, answer }: Props) {
         .map((phoneme) => {
           const pd = getPhonemeDescriptor(phoneme);
           return (
-            <Block input={true} key={i++}>
+            <Block input={true} key={i++} tag={pd.ipa}>
               {pd.key}
             </Block>
           );
@@ -275,16 +275,18 @@ export default function Game({ maxTries, answer }: Props) {
   const copyShare = () => {
     const history = matcher.allMatches
       .map((row) =>
-        row.map((matchType) => {
-          switch (matchType) {
-            case Match.MATCH:
-              return "🟩";
-            case Match.SOME_MATCH:
-              return "🟨";
-            default:
-              return "⬛️";
-          }
-        }).join(''),
+        row
+          .map((matchType) => {
+            switch (matchType) {
+              case Match.MATCH:
+                return "🟩";
+              case Match.SOME_MATCH:
+                return "🟨";
+              default:
+                return "⬛️";
+            }
+          })
+          .join(""),
       )
       .join("\n");
     const title =
@@ -306,7 +308,9 @@ export default function Game({ maxTries, answer }: Props) {
             <p>You correctly guessed the word.</p>
             {answer.type === AnswerType.DAILY ? (
               <p>
-                <a className="share" onClick={copyShare}>Copy to clipboard</a>
+                <a className="share" onClick={copyShare}>
+                  Copy to clipboard
+                </a>
               </p>
             ) : (
               ""
@@ -327,7 +331,9 @@ export default function Game({ maxTries, answer }: Props) {
             </p>
             {answer.type === AnswerType.DAILY ? (
               <p>
-                <a className="share" onClick={copyShare}>Copy to clipboard</a>
+                <a className="share" onClick={copyShare}>
+                  Copy to clipboard
+                </a>
               </p>
             ) : (
               ""
