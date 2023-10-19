@@ -1,6 +1,6 @@
 import fs from "node:fs";
-import { inspect } from "node:util";
 import http from "node:http";
+import { inspect } from "node:util";
 
 const downloadIfNotPresent = !!process.argv.find((arg) => arg === "-d");
 const showSkipped = !!process.argv.find((arg) => arg === "-s");
@@ -8,19 +8,19 @@ const showSkipped = !!process.argv.find((arg) => arg === "-s");
 // Same as the ones in source
 // Single character representations are convenient for saving space
 const PHONEMES = {
-  "awe": "1",
-  "a": "a",
-  "eye": "2",
-  "ao": "3",
-  "e": "e",
-  "ey": "4",
   "i": "i",
-  "ee": "5",
-  "oh": "o",
-  "oy": "6",
   "u": "u",
-  "oo": "7",
+  "e": "e",
   "uh": "0",
+  "a": "a",
+  "awe": "o",
+  "ee": "1",
+  "oo": "2",
+  "ey": "3",
+  "oy": "4",
+  "oh": "5",
+  "eye": "6",
+  "ao": "7",
   // "er": "9"
   "b": "b",
   "ch": "c",
@@ -51,9 +51,12 @@ const PHONEMES = {
 // Read CMU dictionary and download if necessary
 let contents;
 let downloaded = false;
+
 while (true) {
   try {
-    contents = fs.readFileSync("./cmudict-0.7b.txt", { encoding: "latin1" });
+    contents = fs.readFileSync(new URL("./cmudict-0.7b.txt", import.meta.url), {
+      encoding: "latin1",
+    });
     break;
   } catch (err) {
     if (downloaded || !err || err.code !== "ENOENT") {
@@ -88,7 +91,9 @@ while (true) {
       .on("error", (err) => reject(err))
       .on("timeout", (err) => reject(err));
   });
-  fs.writeFileSync("./cmudict-0.7b.txt", gotten, { encoding: "latin1" });
+  fs.writeFileSync(new URL("./cmudict-0.7b.txt", import.meta.url), gotten, {
+    encoding: "latin1",
+  });
   downloaded = true;
 }
 
@@ -317,10 +322,17 @@ for (const [head, chains] of Object.entries(dictionary)) {
 }
 
 if (showSkipped) {
-  console.error("Skipped:", inspect(skipped, { maxArrayLength: skipped.length }));
+  console.error(
+    "Skipped:",
+    inspect(skipped, { maxArrayLength: skipped.length }),
+  );
 }
 
-fs.writeFileSync("all.json", JSON.stringify(dictionary, undefined, 0), {
-  encoding: "utf8",
-});
+fs.writeFileSync(
+  new URL("./all.json", import.meta.url),
+  JSON.stringify(dictionary, undefined, 0),
+  {
+    encoding: "utf8",
+  },
+);
 console.error("Saved into `all.json'");
