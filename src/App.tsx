@@ -25,15 +25,17 @@ const dictionary: Record<string, string[]> = await fetch(
 ).then((res) => (res.status === 200 ? res.json() : null));
 
 function lookup(key: string) {
-  const result = dictionary[key] ?? [];
+  const result = dictionary[key]?.concat() ?? []; // copy
   const normalized = normalizeTextForLookup(key);
   if (normalized !== key) {
-    const resultNormalized = normalizeTextForLookup(key);
+    // append results for normalized key
+    const resultNormalized = dictionary[normalized];
     if (resultNormalized) {
       result.push(...resultNormalized);
     }
   }
-  return result;
+  // remove duplicated
+  return Array.from(new Set(result));
 }
 
 function normalizeTextForLookup(s: string) {
@@ -41,7 +43,14 @@ function normalizeTextForLookup(s: string) {
 }
 
 function normalizeTextForInput(s: string) {
-  return s.replaceAll(/[^A-Za-z'-]+/g, "").toLowerCase();
+  return s
+    .replaceAll(/[^A-Za-z'-]+/g, "")
+    .replaceAll(/''+/g, "'") // remove multiple apostrophes
+    .replaceAll(/--+/g, "-") // remove multiple dashes
+    .replaceAll(/-'+/g, "-")
+    .replaceAll(/'\-+/g, "'")
+    .replace(/^-/, "") // remove initial dash
+    .toLowerCase();
 }
 
 export function App() {
@@ -111,6 +120,7 @@ export function App() {
               return;
             }
             setInput(newValue);
+            // target.setSelectionRange(target.selectionStart, target.selectionStart); // avoid resetting cursor
             setCurrentChoice(0);
           }}
         />
